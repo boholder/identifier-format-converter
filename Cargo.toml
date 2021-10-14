@@ -1,10 +1,29 @@
 [package]
-name = "identifier-format-converter"
+name = "naming"
 version = "0.1.0"
+authors = ["Boholder <boholder@anche.no>"]
+description = """
+A command line tool to convert the naming format (case | notation) of identifiers.
+Use this library to extract the keywords used to further match the source code files.
+For working with sourcecode-related shell scripts.
+"""
+documentation = "https://github.com/boholder/naming"
+homepage = "https://github.com/boholder/naming"
+repository = "https://github.com/boholder/naming"
+keywords = ["code", "naming case"]
+categories = ["command-line-utilities", "text-processing"]
+license = "MIT"
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "naming"
+path = "crates/cli/main.rs"
+bench = false
+
+[workspace]
+members = [
+    "crates/naming_lib",
+]
 
 [dependencies]
-regex = "1.5.4"
 clap = "2.33.3"

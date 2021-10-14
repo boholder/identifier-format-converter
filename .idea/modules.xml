@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/identifier-format-converter.iml" filepath="$PROJECT_DIR$/.idea/identifier-format-converter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/naming.iml" filepath="$PROJECT_DIR$/.idea/naming.iml" />
     </modules>
   </component>
 </project>
