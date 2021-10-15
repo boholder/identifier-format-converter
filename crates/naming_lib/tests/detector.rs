@@ -76,5 +76,5 @@ fn valid_strings_that_more_than_one_word_should_only_be_recognized_as_only_one_f
 
 #[quickcheck]
 fn string_remains_unchanged_after_being_wrapped_into_the_format(s: String) -> bool {
-    s == lib::which_format(&s).to_string()
+    s == lib::which_case(&s).to_string()
 }

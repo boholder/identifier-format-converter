@@ -20,20 +20,20 @@ pub fn build_random_format_str(word: String) -> String {
 }
 
 pub fn build_screaming_snake_str(word: String) -> String {
-    build_underline_str_from(word.to_uppercase())
+    build_underline_str_from(word.to_ascii_uppercase())
 }
 
 pub fn build_snake_str(word: String) -> String {
-    build_underline_str_from(word.to_lowercase())
+    build_underline_str_from(word.to_ascii_lowercase())
 }
 
 pub fn build_kebab_str(word: String) -> String {
-    build_dash_str_from(word.to_lowercase())
+    build_dash_str_from(word.to_ascii_lowercase())
 }
 
 pub fn build_camel_str(word: String) -> String {
     let head = word.clone();
-    head.to_lowercase().add(&build_no_separator_str_from(to_first_uppercase(word)))
+    head.to_ascii_lowercase() + &build_no_separator_str_from(to_first_uppercase(word))
 }
 
 pub fn build_pascal_str(word: String) -> String {
@@ -42,7 +42,7 @@ pub fn build_pascal_str(word: String) -> String {
 
 pub fn to_first_uppercase(s: String) -> String {
     let (first, other) = s.split_at(1);
-    first.to_uppercase().add(&other.to_lowercase())
+    first.to_ascii_uppercase() + &other.to_ascii_lowercase()
 }
 
 pub fn build_underline_str_from(word: String) -> String {

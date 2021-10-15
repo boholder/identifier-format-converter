@@ -1,5 +1,5 @@
-pub use converter::*;
+pub use naming_case::*;
 pub use detector::*;
 
-mod converter;
+mod naming_case;
 mod detector;
