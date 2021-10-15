@@ -1,5 +1,5 @@
 pub use converter::*;
-pub use identifier::*;
+pub use detector::*;
 
 mod converter;
-mod identifier;
+mod detector;

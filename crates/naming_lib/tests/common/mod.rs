@@ -1,15 +1,11 @@
 use std::ops::Add;
 
-use lazy_static::lazy_static;
 use rand::Rng;
-use regex::Regex;
 
-pub fn is_not_letter_with_optional_number(word: &str) -> bool {
-    lazy_static! {
-            static ref VALID:Regex=Regex::new(r"^[a-zA-Z]+\d*$").unwrap();
-        }
-    // example: foo123 or foo
-    !VALID.is_match(word)
+use naming_lib as lib;
+
+pub fn is_not_valid_single_word(word: &str) -> bool {
+    !lib::is_single_word(word)
 }
 
 pub fn build_random_format_str(word: String) -> String {
