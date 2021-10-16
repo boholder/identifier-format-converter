@@ -1,7 +1,7 @@
 [package]
 name = "naming_lib"
 version = "0.1.0"
-authors = ["Boholder <boholder@anche.no>"]
+authors = ["Boholder <bottleholder@anche.no>"]
 description = """
 Library for identifying and converting identifiers naming format (case | notation).
 """
