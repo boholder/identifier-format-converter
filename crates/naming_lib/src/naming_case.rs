@@ -10,7 +10,7 @@ use crate::detector;
 /// It holds the given [String] value when created,
 /// which can be got by calling [NamingCase::to_string()].
 ///
-/// It also can be converted to [String] in another format,
+/// It also can be converted to [String] in another naming format,
 /// as long as it's not the [NamingCase::Invalid] enum.
 #[derive(PartialEq, Debug)]
 pub enum NamingCase {
@@ -22,7 +22,7 @@ pub enum NamingCase {
     Kebab(String),
     Camel(String),
     Pascal(String),
-    /// Can't be recognized as known format.
+    /// Can't be recognized as a known format.
     Invalid(String),
 }
 
@@ -45,11 +45,11 @@ impl NamingCase {
     /// Create a [NamingCase] value from an identifier.
     ///
     /// Alias of [which_case()].
-    fn new(identifier: &str) -> NamingCase {
+    pub fn new(identifier: &str) -> NamingCase {
         detector::which_case(identifier)
     }
 
-    fn to_screaming_snake(&self) -> Result<String, &'static str> {
+    pub fn to_screaming_snake(&self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         Ok(words.into_iter()
             .map(|word| word.to_ascii_uppercase())
@@ -57,30 +57,30 @@ impl NamingCase {
             .join("_"))
     }
 
-    fn to_snake(&self) -> Result<String, &'static str> {
+    pub fn to_snake(&self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         Ok(words.into_iter()
-            .map(|word| word.to_lowercase())
+            .map(|word| word.to_ascii_lowercase())
             .collect::<Vec<String>>()
             .join("_"))
     }
 
-    fn to_kebab(&self) -> Result<String, &'static str> {
+    pub fn to_kebab(&self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         Ok(words.into_iter()
-            .map(|word| word.to_lowercase())
+            .map(|word| word.to_ascii_lowercase())
             .collect::<Vec<String>>()
             .join("-"))
     }
 
-    fn to_camel(&self) -> Result<String, &'static str> {
+    pub fn to_camel(&self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         let mut iter = words.into_iter();
         let first_word = iter.next().unwrap();
-        Ok(first_word + &compose_words_to_pascal(iter.collect()))
+        Ok(first_word.to_ascii_lowercase() + &compose_words_to_pascal(iter.collect()))
     }
 
-    fn to_pascal(&self) -> Result<String, &'static str> {
+    pub fn to_pascal(&self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         Ok(compose_words_to_pascal(words))
     }
@@ -96,7 +96,7 @@ pub fn from(identifier: &str) -> NamingCase {
 /// Return a [NamingCase::Pascal] value for a hungarian notation identifier,
 /// remove the first word which representing the variable type.
 ///
-/// Or return a [Naming::Invalid] value for others.
+/// Or return a [Naming::Invalid] value for other inputs.
 ///
 /// # Examples
 ///
@@ -149,10 +149,10 @@ fn extract_words_from(case: &NamingCase) -> Result<Vec<String>, &'static str> {
                 .expect("Can't capture first word in camel case string.")
                 .as_str().to_string();
 
-            let mut other_words = extract_words_from_pascal(
-                &(ori.strip_prefix(&first_word)).unwrap());
+            let other_words = ori.strip_prefix(&first_word).unwrap();
+            let mut other_words = extract_words_from_pascal(&other_words);
 
-            words.push(first_word);
+            words.push(first_word.to_ascii_lowercase());
             words.append(&mut other_words);
 
             Ok(words)
