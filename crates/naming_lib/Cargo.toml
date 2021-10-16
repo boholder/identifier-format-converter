@@ -5,8 +5,8 @@ authors = ["Boholder <bottleholder@anche.no>"]
 description = """
 Library for identifying and converting identifiers naming format (case | notation).
 """
-documentation = "https://docs.rs/naming_lib/0.1.0/naming_lib/"
-homepage = "https://docs.rs/naming_lib/0.1.0/naming_lib/"
+documentation = "https://docs.rs/naming_lib"
+homepage = "https://github.com/boholder/naming"
 repository = "https://github.com/boholder/naming/tree/master/crates/naming-lib"
 keywords = ["source", "code", "naming", "format"]
 categories = ["text-processing"]
