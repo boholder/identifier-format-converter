@@ -10,7 +10,7 @@ For working with sourcecode-related shell scripts.
 documentation = "https://github.com/boholder/naming"
 homepage = "https://github.com/boholder/naming"
 repository = "https://github.com/boholder/naming"
-keywords = ["code", "naming case"]
+keywords = ["source", "code", "naming", "format"]
 categories = ["command-line-utilities", "text-processing"]
 license = "MIT"
 edition = "2018"

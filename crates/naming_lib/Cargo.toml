@@ -8,7 +8,7 @@ Library for identifying and converting identifiers naming format (case | notatio
 documentation = "https://docs.rs/naming_lib/0.1.0/naming_lib/"
 homepage = "https://docs.rs/naming_lib/0.1.0/naming_lib/"
 repository = "https://github.com/boholder/naming/tree/master/crates/naming-lib"
-keywords = ["source", "code", "naming case", "format"]
+keywords = ["source", "code", "naming", "format"]
 categories = ["text-processing"]
 license = "MIT"
 edition = "2018"
