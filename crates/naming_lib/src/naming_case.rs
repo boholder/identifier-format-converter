@@ -5,13 +5,80 @@ use regex::Regex;
 
 use crate::detector;
 
-/// Indicates which format the string belongs to.
+/// Indicates which format the string belongs to,
+/// and acts as an intermediary between format conversions.
 ///
-/// It holds the given [String] value when created,
-/// which can be got by calling [NamingCase::to_string()].
+/// ## Create Instances
 ///
-/// It also can be converted to [String] in another naming format,
-/// as long as it's not the [NamingCase::Invalid] enum.
+/// There are three ways to create an instance.
+/// These three are aliases of each other.
+///
+/// ```
+/// use naming_lib::{NamingCase, which_case, from};
+///
+/// let first = NamingCase::new("identifier");
+/// let second = which_case("identifier");
+/// let third = from("identifier");
+/// ```
+///
+/// ### Notice
+///
+/// Of course you can generate instances of a specific enum type directly,
+/// I can't stop you
+/// (in fact [there is a solution](https://stackoverflow.com/a/28090996/11397457),
+/// but it makes things more complex),
+/// but I **don't recommend using this approach**.
+///
+/// I can't do an input valid check when you use this approach,
+/// type-related methods on these instances **may cause unexpected panic**.
+///
+/// I currently use this myself to:
+///
+/// 1. write document test cases
+/// (have to use this to "clearly express the state of the test values").
+///
+/// 2. generated instances of [Invalid](NamingCase::Invalid) enum type
+/// (it's safe, because conversion methods cannot be called on this enum type,
+/// there are no other type-related methods available now).
+///
+/// ```
+/// use naming_lib::NamingCase;
+///
+/// let direct_instance = NamingCase::Invalid("text".to_string());
+/// ```
+///
+/// ## Get Origin String From An Instance
+///
+/// A [NamingCase] instance holds the given string value when created,
+/// which can be got by calling [to_string()](std::string::ToString).
+///
+/// ```
+/// use naming_lib::from;
+///
+/// assert_eq!("example",from("example").to_string())
+/// ```
+///
+/// ## Convert An Instance To Other Naming Case String
+///
+/// A [NamingCase] instance also can be converted to a string in another naming format,
+/// as long as it's not the [Invalid](NamingCase::Invalid) enum.
+///
+/// ```
+/// use naming_lib::from;
+///
+/// assert_eq!("camel_case", from("camelCase").to_snake().unwrap());
+/// ```
+///
+/// ### Notice
+///
+/// For ease of use,
+/// instead of implementing the conversion methods
+/// with [Invalid](NamingCase::Invalid) excluded,
+/// I have chosen that all conversion methods
+/// will return the [Result](core::result) type.
+///
+/// Calling any conversion method on an [Invalid](NamingCase::Invalid) enum
+/// will return an [Err](core::result::Result::Err).
 #[derive(PartialEq, Debug)]
 pub enum NamingCase {
     /// A single word will be recognized as multiple formats,
@@ -40,15 +107,29 @@ impl Display for NamingCase {
     }
 }
 
-#[allow(dead_code)]
 impl NamingCase {
     /// Create a [NamingCase] value from an identifier.
     ///
-    /// Alias of [which_case()].
+    /// Alias of [which_case()](crate::detector::which_case()) and [from()](crate::naming_case::from()).
     pub fn new(identifier: &str) -> NamingCase {
         detector::which_case(identifier)
     }
 
+    /// Convert the included string to screaming snake case.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use naming_lib::{from};
+    ///
+    /// assert_eq!("SCREAMING", from("Screaming").to_screaming_snake().unwrap());
+    /// assert_eq!("CAMEL_CASE", from("camelCase").to_screaming_snake().unwrap());
+    /// assert_eq!("SNAKE_CASE", from("snake_case").to_screaming_snake().unwrap());
+    /// ```
+    /// # Errors
+    ///
+    /// Perform this on [Invalid](NamingCase::Invalid) enum
+    /// will get an [Err](core::result::Result::Err).
     pub fn to_screaming_snake(&self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         Ok(words.into_iter()
@@ -57,6 +138,21 @@ impl NamingCase {
             .join("_"))
     }
 
+    /// Convert the included string to snake case.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use naming_lib::{from};
+    ///
+    /// assert_eq!("snake", from("Snake").to_snake().unwrap());
+    /// assert_eq!("kebab_case", from("kebab-case").to_snake().unwrap());
+    /// assert_eq!("camel_case", from("camelCase").to_snake().unwrap());
+    /// ```
+    /// # Errors
+    ///
+    /// Perform this on [Invalid](NamingCase::Invalid) enum
+    /// will get an [Err](core::result::Result::Err).
     pub fn to_snake(&self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         Ok(words.into_iter()
@@ -65,6 +161,21 @@ impl NamingCase {
             .join("_"))
     }
 
+    /// Convert the included string to kebab case.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use naming_lib::{from};
+    ///
+    /// assert_eq!("kebab", from("Kebab").to_kebab().unwrap());
+    /// assert_eq!("camel-case", from("camelCase").to_kebab().unwrap());
+    /// assert_eq!("snake-case", from("snake_case").to_kebab().unwrap());
+    /// ```
+    /// # Errors
+    ///
+    /// Perform this on [Invalid](NamingCase::Invalid) enum
+    /// will get an [Err](core::result::Result::Err).
     pub fn to_kebab(&self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         Ok(words.into_iter()
@@ -73,6 +184,22 @@ impl NamingCase {
             .join("-"))
     }
 
+    /// Convert the included string to camel case.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use naming_lib::{from};
+    ///
+    /// assert_eq!("camel", from("Camel").to_camel().unwrap());
+    /// assert_eq!("pascalCase", from("PascalCase").to_camel().unwrap());
+    /// assert_eq!("snakeCase", from("snake_case").to_camel().unwrap());
+    /// ```
+    /// # Errors
+    ///
+    /// Perform this on [Invalid](NamingCase::Invalid) enum
+    /// will get an [Err](core::result::Result::Err).
+    ///
     pub fn to_camel(&self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         let mut iter = words.into_iter();
@@ -80,6 +207,21 @@ impl NamingCase {
         Ok(first_word.to_ascii_lowercase() + &compose_words_to_pascal(iter.collect()))
     }
 
+    /// Convert the included string to pascal case.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use naming_lib::{from};
+    ///
+    /// assert_eq!("Pascal", from("Pascal").to_pascal().unwrap());
+    /// assert_eq!("CamelCase", from("camelCase").to_pascal().unwrap());
+    /// assert_eq!("SnakeCase", from("snake_case").to_pascal().unwrap());
+    /// ```
+    /// # Errors
+    ///
+    /// Perform this on [Invalid](NamingCase::Invalid) enum
+    /// will get an [Err](core::result::Result::Err).
     pub fn to_pascal(&self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         Ok(compose_words_to_pascal(words))
@@ -88,15 +230,15 @@ impl NamingCase {
 
 /// Create a [NamingCase] value from an identifier.
 ///
-/// Alias of [which_case()] and [NamingCase::new()].
+/// Alias of [which_case()](crate::detector::which_case()) and [NamingCase::new()].
 pub fn from(identifier: &str) -> NamingCase {
     detector::which_case(identifier)
 }
 
-/// Return a [NamingCase::Pascal] value for a hungarian notation identifier,
+/// Return a [Pascal](NamingCase::Pascal) enum for a hungarian notation identifier,
 /// remove the first word which representing the variable type.
 ///
-/// Or return a [Naming::Invalid] value for other inputs.
+/// Or return a [Invalid](NamingCase::Invalid) enum for other inputs.
 ///
 /// # Examples
 ///
@@ -107,8 +249,8 @@ pub fn from(identifier: &str) -> NamingCase {
 /// assert_eq!(valid, NamingCase::Pascal("PageSize".to_string()));
 /// assert_eq!(valid.to_string(), "PageSize");
 ///
-/// // A hungarian notation identifier will be recognized as camel case.
-/// // Even though this is a valid Pascal case, it is still treated as invalid.
+/// // A hungarian notation identifier will be recognized as a camel case.
+/// // Even though this is a valid pascal case, it will still be treated as invalid.
 /// let invalid = from_hungarian_notation("NotACamelCase");
 /// assert_eq!(invalid, NamingCase::Invalid("NotACamelCase".to_string()));
 /// ```
@@ -122,7 +264,7 @@ pub fn from_hungarian_notation(identifier: &str) -> NamingCase {
     // discard first word
     iter.next();
     // return remains as a pascal case.
-    NamingCase::new(&iter.collect::<Vec<String>>().join(""))
+    NamingCase::Pascal(iter.collect::<Vec<String>>().join(""))
 }
 
 lazy_static! {
@@ -145,9 +287,8 @@ fn extract_words_from(case: &NamingCase) -> Result<Vec<String>, &'static str> {
         NamingCase::Camel(ori) => {
             let mut words = Vec::new();
 
-            let first_word = LOWER_CASE_REGEX.captures(&ori).unwrap().get(0)
-                .expect("Can't capture first word in camel case string.")
-                .as_str().to_string();
+            let first_word = LOWER_CASE_REGEX.captures(&ori).unwrap()
+                .get(0).unwrap().as_str().to_string();
 
             let other_words = ori.strip_prefix(&first_word).unwrap();
             let mut other_words = extract_words_from_pascal(&other_words);

@@ -4,27 +4,34 @@ use regex::Regex;
 use crate::NamingCase;
 
 /// Determine which format the identifier belongs to.
+/// Alias of [NamingCase::new()] and [from()](crate::naming_case::from()).
+///
+/// # Examples
 ///
 /// Note that this method artificially restricts
 /// only the `alphabetic + (optionally) numeric` format to be a valid word,
 /// and words are compose into various formats with symbol `"-"`, `"_"` or without symbol.
 ///
-/// # Examples
+/// ```
+/// use naming_lib::{NamingCase::*, which_case};
+///
+/// assert_eq!(SingleWord("foo".to_string()), which_case("foo"));
+/// assert_eq!(SingleWord("foo123".to_string()), which_case("foo123"));
+/// assert_eq!(ScreamingSnake("FOO_BAR".to_string()), which_case("FOO_BAR"));
+/// assert_eq!(Snake("foo_bar".to_string()), which_case("foo_bar"));
+/// assert_eq!(Camel("fooBar".to_string()), which_case("fooBar"));
+/// assert_eq!(Pascal("FooBar".to_string()), which_case("FooBar"));
+/// ```
+///
+/// Therefore, the following strings will be recognized as invalid format.
 ///
 /// ```
-/// use naming_lib::{NamingCase, which_case};
+/// use naming_lib::{NamingCase::Invalid, which_case};
 ///
-/// assert_eq!(which_case("foo"), NamingCase::SingleWord("foo".to_string()));
-/// assert_eq!(which_case("foo123"), NamingCase::SingleWord("foo123".to_string()));
-/// assert_eq!(which_case("FOO_BAR"), NamingCase::ScreamingSnake("FOO_BAR".to_string()));
-/// assert_eq!(which_case("foo_bar"), NamingCase::Snake("foo_bar".to_string()));
-/// assert_eq!(which_case("fooBar"), NamingCase::Camel("fooBar".to_string()));
-/// assert_eq!(which_case("FooBar"), NamingCase::Pascal("FooBar".to_string()));
-///
-/// assert_eq!(which_case("中文"), NamingCase::Invalid("中文".to_string()));
-/// assert_eq!(which_case("foo@bar"), NamingCase::Invalid("foo@bar".to_string()));
-/// assert_eq!(which_case("@foobar"), NamingCase::Invalid("@foobar".to_string()));
-/// assert_eq!(which_case("foobar@"), NamingCase::Invalid("foobar@".to_string()));
+/// assert_eq!(Invalid("非英语".to_string()), which_case("非英语"));
+/// assert_eq!(Invalid("foo@bar".to_string()), which_case("foo@bar"));
+/// assert_eq!(Invalid("@foobar".to_string()), which_case("@foobar"));
+/// assert_eq!(Invalid("foobar@".to_string()), which_case("foobar@"));
 /// ```
 pub fn which_case(identifier: &str) -> NamingCase {
     // Any better idea to refactor this method?
@@ -45,7 +52,7 @@ pub fn which_case(identifier: &str) -> NamingCase {
     }
 }
 
-/// matches r"^(?:\[a-z]+|\[A-Z]+|\[A-Z]\[a-z]+)\d*$"
+/// Matches `r"^(?:\[a-z]+|\[A-Z]+|\[A-Z]\[a-z]+)\d*$"`.
 ///
 /// # Examples
 ///
@@ -57,6 +64,7 @@ pub fn which_case(identifier: &str) -> NamingCase {
 /// assert!(is_single_word(&"Aaa"));
 /// assert!(is_single_word(&"AAA"));
 ///
+/// // two camel cases
 /// assert!(!is_single_word(&"aAA"));
 /// assert!(!is_single_word(&"aAa"));
 /// ```
@@ -67,7 +75,7 @@ pub fn is_single_word(word: &str) -> bool {
     SINGLE_WORD_REGEX.is_match(word)
 }
 
-/// matches r"^\[A-Z]+\d*(_\[A-Z]+\d*)*$",
+/// Matches `r"^\[A-Z]+\d*(_\[A-Z]+\d*)*$"`.
 ///
 /// # Examples
 ///
@@ -85,7 +93,7 @@ pub fn is_screaming_snake(identifier: &str) -> bool {
     SCREAMING_SNAKE_REGEX.is_match(identifier)
 }
 
-/// matches r"^\[a-z]+\d*(_\[a-z]+\d*)*$",
+/// Matches `r"^\[a-z]+\d*(_\[a-z]+\d*)*$"`.
 ///
 /// # Examples
 ///
@@ -103,7 +111,7 @@ pub fn is_snake(identifier: &str) -> bool {
     SNAKE_REGEX.is_match(identifier)
 }
 
-/// matches r"^\[a-z]+\d*(-\[a-z]+\d*)*$",
+/// Matches `r"^\[a-z]+\d*(-\[a-z]+\d*)*$"`.
 ///
 /// # Examples
 ///
@@ -121,7 +129,7 @@ pub fn is_kebab(identifier: &str) -> bool {
     KEBAB_REGEX.is_match(identifier)
 }
 
-/// matches r"^\[a-z]+\d*(\[A-Z]\[a-z]*\d*)*$",
+/// Matches `r"^\[a-z]+\d*(\[A-Z]\[a-z]*\d*)*$"`.
 ///
 /// # Examples
 ///
@@ -139,7 +147,7 @@ pub fn is_camel(identifier: &str) -> bool {
     CAMEL_REGEX.is_match(identifier)
 }
 
-/// matches r"^(\[A-Z]\[a-z]*\d*)+$",
+/// Matches `r"^(\[A-Z]\[a-z]*\d*)+$"`.
 ///
 /// # Examples
 ///
