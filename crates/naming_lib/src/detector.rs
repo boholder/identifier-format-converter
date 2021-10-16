@@ -74,6 +74,7 @@ pub fn is_single_word(word: &str) -> bool {
 /// ```
 /// use naming_lib::is_screaming_snake;
 ///
+/// assert!(is_screaming_snake(&"FOO"));
 /// assert!(is_screaming_snake(&"FOO_BAR"));
 /// assert!(is_screaming_snake(&"FOO123_BAR456"));
 /// ```
@@ -91,6 +92,7 @@ pub fn is_screaming_snake(identifier: &str) -> bool {
 /// ```
 /// use naming_lib::is_snake;
 ///
+/// assert!(is_snake(&"foo"));
 /// assert!(is_snake(&"foo_bar"));
 /// assert!(is_snake(&"foo123_bar456"));
 /// ```
@@ -108,6 +110,7 @@ pub fn is_snake(identifier: &str) -> bool {
 /// ```
 /// use naming_lib::is_kebab;
 ///
+/// assert!(is_kebab(&"foo"));
 /// assert!(is_kebab(&"foo-bar"));
 /// assert!(is_kebab(&"foo123-bar456"));
 /// ```
@@ -125,6 +128,7 @@ pub fn is_kebab(identifier: &str) -> bool {
 /// ```
 /// use naming_lib::is_camel;
 ///
+/// assert!(is_camel(&"foo"));
 /// assert!(is_camel(&"fooBar"));
 /// assert!(is_camel(&"foo123Bar456"));
 /// ```
@@ -142,6 +146,7 @@ pub fn is_camel(identifier: &str) -> bool {
 /// ```
 /// use naming_lib::is_pascal;
 ///
+/// assert!(is_pascal(&"Foo"));
 /// assert!(is_pascal(&"FooBar"));
 /// assert!(is_pascal(&"Foo123Bar456"));
 /// ```

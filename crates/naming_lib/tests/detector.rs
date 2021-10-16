@@ -13,42 +13,36 @@ mod common;
 
 #[quickcheck]
 fn screaming_snake_identifier_should_be_recognized(word: String) -> TestResult {
-    if is_not_valid_single_word(&word) {
-        return TestResult::discard();
-    }
-    TestResult::from_bool(lib::is_screaming_snake(&build_screaming_snake_str(word)))
+    id_test_helper(word, lib::is_screaming_snake, build_screaming_snake_str)
 }
 
 #[quickcheck]
 fn snake_identifier_should_be_recognized(word: String) -> TestResult {
-    if is_not_valid_single_word(&word) {
-        return TestResult::discard();
-    }
-    TestResult::from_bool(lib::is_snake(&build_snake_str(word)))
+    id_test_helper(word, lib::is_snake, build_snake_str)
 }
 
 #[quickcheck]
 fn kebab_identifier_should_be_recognized(word: String) -> TestResult {
-    if is_not_valid_single_word(&word) {
-        return TestResult::discard();
-    }
-    TestResult::from_bool(lib::is_kebab(&build_kebab_str(word)))
+    id_test_helper(word, lib::is_kebab, build_kebab_str)
 }
 
 #[quickcheck]
 fn camel_identifier_should_be_recognized(word: String) -> TestResult {
-    if is_not_valid_single_word(&word) {
-        return TestResult::discard();
-    }
-    TestResult::from_bool(lib::is_camel(&build_camel_str(word)))
+    id_test_helper(word, lib::is_camel, build_camel_str)
 }
 
 #[quickcheck]
 fn pascal_identifier_should_be_recognized(word: String) -> TestResult {
+    id_test_helper(word, lib::is_pascal, build_pascal_str)
+}
+
+fn id_test_helper(word: String,
+                  checker: fn(&str) -> bool,
+                  builder: fn(String) -> String) -> TestResult {
     if is_not_valid_single_word(&word) {
         return TestResult::discard();
     }
-    TestResult::from_bool(lib::is_pascal(&build_pascal_str(word)))
+    TestResult::from_bool(checker(&builder(word)))
 }
 
 #[quickcheck]
