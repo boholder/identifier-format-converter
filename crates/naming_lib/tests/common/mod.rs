@@ -8,15 +8,12 @@ pub fn is_not_valid_single_word(word: &str) -> bool {
     !lib::is_single_word(word)
 }
 
-pub fn build_random_format_str(word: String) -> String {
-    let mut rng = rand::thread_rng();
-    return match rng.gen_range(0..5) {
-        0 => build_screaming_snake_str(word),
-        1 => build_snake_str(word),
-        2 => build_kebab_str(word),
-        3 => build_camel_str(word),
-        _ => build_pascal_str(word),
-    };
+pub fn build_all_format_str(word: String) -> Vec<String> {
+    vec![build_screaming_snake_str(word.clone()),
+         build_snake_str(word.clone()),
+         build_kebab_str(word.clone()),
+         build_camel_str(word.clone()),
+         build_pascal_str(word)]
 }
 
 pub fn build_screaming_snake_str(word: String) -> String {
