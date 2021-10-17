@@ -29,6 +29,12 @@ use crate::detector;
 /// but it makes things more complex),
 /// but I **don't recommend using this approach**.
 ///
+/// ```
+/// use naming_lib::NamingCase;
+///
+/// let direct_instance = NamingCase::Invalid("text".to_string());
+/// ```
+///
 /// I can't do an input valid check when you use this approach,
 /// type-related methods on these instances **may cause unexpected panic**.
 ///
@@ -40,12 +46,6 @@ use crate::detector;
 /// 2. generated instances of [Invalid](NamingCase::Invalid) enum type
 /// (it's safe, because conversion methods cannot be called on this enum type,
 /// there are no other type-related methods available now).
-///
-/// ```
-/// use naming_lib::NamingCase;
-///
-/// let direct_instance = NamingCase::Invalid("text".to_string());
-/// ```
 ///
 /// ## Get Origin String From An Instance
 ///
