@@ -1,11 +1,11 @@
 [package]
-name = "naming"
+name = "naming_clt"
 version = "0.1.0"
 authors = ["Boholder <boholder@anche.no>"]
 description = """
 A command line tool to identify and convert the naming format (case | notation) of identifiers.
 Use this library to prepare identifier strings for further matching / replacing operation on the source code files.
-It is recommended to use it in combination with xargs.
+It is recommended to use it in combination with "xargs -I".
 """
 documentation = "https://github.com/boholder/naming"
 homepage = "https://github.com/boholder/naming"
