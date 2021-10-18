@@ -9,6 +9,10 @@
 //!
 //! 3. Convert identifiers between different naming formats.
 //! (example: [to_camel()](NamingCase::to_camel()))
+
+// Just re-expose every public component in two modules.
+// We'll test them in integrate tests.
+
 pub use detector::*;
 pub use naming_case::*;
 

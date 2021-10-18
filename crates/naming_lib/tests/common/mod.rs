@@ -1,3 +1,6 @@
+// Helper functions,
+// mainly for building various format strings.
+
 use std::ops::Add;
 
 use rand::Rng;

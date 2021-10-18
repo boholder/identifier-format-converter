@@ -1,3 +1,8 @@
+// We use this property based testing library for integrate testing.
+// It can generate a large number of random test cases,
+// which is just right for testing this crate.
+// https://github.com/BurntSushi/quickcheck
+
 #[cfg(test)]
 extern crate quickcheck;
 #[cfg(test)]
