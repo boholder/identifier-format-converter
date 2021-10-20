@@ -130,7 +130,7 @@ impl NamingCase {
     ///
     /// Perform this on [Invalid](NamingCase::Invalid) enum
     /// will get an [Err](core::result::Result::Err).
-    pub fn to_screaming_snake(&self) -> Result<String, &'static str> {
+    pub fn to_screaming_snake(self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         Ok(words.into_iter()
             .map(|word| word.to_ascii_uppercase())
@@ -153,7 +153,7 @@ impl NamingCase {
     ///
     /// Perform this on [Invalid](NamingCase::Invalid) enum
     /// will get an [Err](core::result::Result::Err).
-    pub fn to_snake(&self) -> Result<String, &'static str> {
+    pub fn to_snake(self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         Ok(words.into_iter()
             .map(|word| word.to_ascii_lowercase())
@@ -176,7 +176,7 @@ impl NamingCase {
     ///
     /// Perform this on [Invalid](NamingCase::Invalid) enum
     /// will get an [Err](core::result::Result::Err).
-    pub fn to_kebab(&self) -> Result<String, &'static str> {
+    pub fn to_kebab(self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         Ok(words.into_iter()
             .map(|word| word.to_ascii_lowercase())
@@ -200,7 +200,7 @@ impl NamingCase {
     /// Perform this on [Invalid](NamingCase::Invalid) enum
     /// will get an [Err](core::result::Result::Err).
     ///
-    pub fn to_camel(&self) -> Result<String, &'static str> {
+    pub fn to_camel(self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         let mut iter = words.into_iter();
         let first_word = iter.next().unwrap();
@@ -222,7 +222,7 @@ impl NamingCase {
     ///
     /// Perform this on [Invalid](NamingCase::Invalid) enum
     /// will get an [Err](core::result::Result::Err).
-    pub fn to_pascal(&self) -> Result<String, &'static str> {
+    pub fn to_pascal(self) -> Result<String, &'static str> {
         let words = extract_words_from(self)?;
         Ok(compose_words_to_pascal(words))
     }
@@ -260,7 +260,7 @@ pub fn from_hungarian_notation(identifier: &str) -> NamingCase {
         return NamingCase::Invalid(identifier.to_string());
     }
 
-    let mut iter = extract_words_from(&real_case).unwrap().into_iter();
+    let mut iter = extract_words_from(real_case).unwrap().into_iter();
     // discard first word
     iter.next();
     // return remains as a pascal case.
@@ -272,7 +272,7 @@ lazy_static! {
     static ref FIRST_UPPER_CASE_REGEX:Regex=Regex::new(r"[A-Z][a-z]*\d*").unwrap();
 }
 
-fn extract_words_from(case: &NamingCase) -> Result<Vec<String>, &'static str> {
+fn extract_words_from(case: NamingCase) -> Result<Vec<String>, &'static str> {
     return match case {
         NamingCase::SingleWord(ori) => { Ok(vec![ori.to_string()]) }
         NamingCase::ScreamingSnake(ori) => {
