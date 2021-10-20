@@ -1,0 +1,3 @@
+[submodule "crates/naming_lib"]
+	path = crates/naming_lib
+	url = https://github.com/boholder/naming_lib
