@@ -1,46 +1,39 @@
 use clap::{App, Arg};
 
-fn main() {
+pub fn app() -> App<'static, 'static> {
     App::new("naming")
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
-        .about(
-            ("\n".to_string() +
-                &[DESCRIPTION, LINKS, HELP_HINT, EXAMPLES].join("\n\n")
-            ).as_str())
+        .about(ABOUT)
         .args(&args())
-        .get_matches();
 }
 
-const DESCRIPTION: &str = "\
+const ABOUT: &str = "\n\
 Extract and convert the naming format(case) of identifiers from files.
 Use this tool to prepare identifier name strings for further operations
 (matching, replacing...) on relative files.
-It is recommended to use this tool in combination with \"xargs\".";
+It is recommended to use this tool in combination with \"xargs\".
 
-const HELP_HINT: &str = "\
-Use -h for a brief help information, and --help for a more detailed version.";
+Check the [homepage] for more information:
+-> https://github.com/boholder/naming
 
-const EXAMPLES: &str = "\
+Feel free to submit new [issues] when you found a bug or have suggestions:
+-> https://github.com/boholder/naming/issues/new
+
+Use -h for a brief help information, and --help for a more detailed version.
+
 EXAMPLE:
     # 1. default output all 5 format conventions, starts with origin input
     $ echo \"pageSize\" | naming
     pageSize PAGE_SIZE page_size page-size pageSize PageSize
 
     # 2. search all positions of one identifier
-    $ echo \"pageSize\" | naming | xargs -I {} -- grep -r src_dir
+    $ echo \"pageSize\" | naming | xargs -n1 -I {} -- grep -r {} src_dir
 
     # 3. change one identifier from camelCase to snake_case
     $ echo \"pageSize\" | naming --output=s | \\
       xargs -l -t -- bash -c 'sed -i \"s/$0/$1/g\" mapper.java'
     bash -c 'sed -i \"s/$0/$1/g\" mapper.java' pageSize page_size";
-
-const LINKS: &str = "\
-Check the [homepage] for more information:
--> https://github.com/boholder/naming
-
-Feel free to submit new [issues] when you found a bug or have suggestions:
--> https://github.com/boholder/naming/issues/new";
 
 fn args<'a, 'b>() -> Box<[Arg<'a, 'b>]> {
     vec![
@@ -77,14 +70,16 @@ fn args<'a, 'b>() -> Box<[Arg<'a, 'b>]> {
         Arg::with_name("before")
             .short("b")
             .long("before")
-            .help("Set non-whitespace characters before identifiers; default are(2): '(' ','")
+            .help("Set non-whitespace characters before identifiers; \
+            default(2): \"(\" \",\"")
             .takes_value(true)
             .multiple(true)
             .use_delimiter(true),
         Arg::with_name("after")
             .short("a")
             .long("after")
-            .help("Set non-whitespace characters after identifiers; default are(3): '=' ')' ','")
+            .help("Set non-whitespace characters after identifiers; \
+            default(3): \"=\" \")\" \",\"")
             .takes_value(true)
             .multiple(true)
             .use_delimiter(true),
