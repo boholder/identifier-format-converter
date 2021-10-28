@@ -121,7 +121,7 @@ impl Captor {
 
 #[cfg(test)]
 mod stdin_reader_tests {
-    use crate::extractor::read_from_input;
+    use crate::extraction::read_from_input;
 
     #[test]
     fn read_from_input_without_logical_eof() {

@@ -1,5 +1,5 @@
-pub use convertor::*;
-pub use extractor::*;
+pub use convertion::*;
+pub use extraction::*;
 
-mod extractor;
-mod convertor;
+mod extraction;
+mod convertion;
