@@ -3,11 +3,13 @@ use std::io::{self, BufRead, Error};
 
 use regex::{self, Regex};
 
-pub fn read_from_files(files: Vec<String>, eof: Option<&str>) -> io::Result<String> {
+/// Convert Vec<String> into a slice of &str in Rust? :
+/// https://stackoverflow.com/a/41180422/11397457
+pub fn read_from_files<T: AsRef<str>>(files: &[T], eof: Option<&str>) -> io::Result<String> {
     let mut text = String::new();
     for file in files {
         text.push(' ');
-        text.push_str(&read_file(&file, eof)?);
+        text.push_str(&read_file(file.as_ref(), eof)?);
     };
     Ok(text)
 }
@@ -39,33 +41,43 @@ fn read_from_input<R>(mut input: R, eof: Option<&str>) -> io::Result<String>
     apply_eof_on_text(eof, buffer)
 }
 
+/// Answer user's `--before`, `--after` options,
+/// capture words that match the options from given long text.
 pub struct Captor {
     before_regex: Regex,
     after_regex: Regex,
 }
 
 impl Captor {
-    pub fn new(before: Vec<String>, after: Vec<String>) -> Captor {
-        let before_locators = escape(&before).join("|");
-        let after_locators = escape(&after).join("|");
+    pub fn new<T: AsRef<str>>(before: &[T], after: &[T]) -> Captor {
         Captor {
             before_regex: Regex::new(
-                format!(r"(?:{}|\s|\A)([a-zA-Z0-9_-]+)", before_locators).as_str()
+                format!(r"(?:{}|\s|\A)([a-zA-Z0-9_-]+)",
+                        Captor::escape(before).join("|")
+                ).as_str()
             ).unwrap(),
 
             after_regex: Regex::new(
-                format!(r"([a-zA-Z0-9_-]+)(?:{}|\s|\z)", after_locators).as_str()
+                format!(r"([a-zA-Z0-9_-]+)(?:{}|\s|\z)",
+                        Captor::escape(after).join("|")
+                ).as_str()
             ).unwrap(),
         }
+    }
+
+    /// We needs to escape
+    /// outside character classes characters that in user input
+    /// for constructing regular expression.
+    fn escape<T: AsRef<str>>(ori: &[T]) -> Vec<String> {
+        ori.into_iter()
+            .map(|locator| regex::escape(locator.as_ref()))
+            .collect()
     }
 
     /// Default captor has common locating symbols 
     /// for extracting identifiers from sourcecode.
     pub fn default() -> Captor {
-        Captor::new(
-            vec!["(", ","].into_iter().map(|str| str.to_string()).collect(),
-            vec![",", ")", "="].into_iter().map(|str| str.to_string()).collect(),
-        )
+        Captor::new(&["(", ","], &[",", ")", "="])
     }
 
     /// Extract words from given long text string,
@@ -107,13 +119,6 @@ impl Captor {
     }
 }
 
-/// We needs to escape
-/// outside character classes characters that in user input
-/// for constructing regular expression.
-fn escape(ori: &Vec<String>) -> Vec<String> {
-    ori.into_iter().map(|locator| regex::escape(locator)).collect()
-}
-
 #[cfg(test)]
 mod stdin_reader_tests {
     use crate::extractor::read_from_input;
@@ -143,19 +148,16 @@ mod stdin_reader_tests {
 #[cfg(test)]
 mod captor_tests {
     use super::Captor;
-    use super::escape;
 
     /// [This answer](https://stackoverflow.com/a/400316/11397457)
     /// gives me the special character list for testing.
     #[test]
     fn can_escape_special_chars_in_user_input() {
-        let locators: Vec<String> = vec![".", "^", "$", "*", "+",
-                                         "?", "(", ")", "[", "{", r"\", "|"].into_iter()
-            .map(|str| str.to_string()).collect();
-        let actual = escape(&locators);
-        let expect: Vec<String> = vec![r"\.", r"\^", r"\$", r"\*", r"\+",
-                                       r"\?", r"\(", r"\)", r"\[", r"\{", r"\\", r"\|"].into_iter()
-            .map(|str| str.to_string()).collect();
+        let locators = [".", "^", "$", "*", "+",
+            "?", "(", ")", "[", "{", r"\", "|"];
+        let actual = Captor::escape(&locators);
+        let expect = [r"\.", r"\^", r"\$", r"\*", r"\+",
+            r"\?", r"\(", r"\)", r"\[", r"\{", r"\\", r"\|"];
         assert_eq!(actual, expect);
     }
 
@@ -181,7 +183,7 @@ mod captor_tests {
         let before: Vec<String> = "@#$&".chars().map(|c| c.to_string()).collect();
         let after = before.clone();
 
-        let actual = Captor::new(before, after).capture_words(text);
+        let actual = Captor::new(&before, &after).capture_words(text);
         // notice that the result is sorted.
         let expect: Vec<String> = vec!["be", "can", "matched", "now"].into_iter()
             .map(|str| str.to_string()).collect();
