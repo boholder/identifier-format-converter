@@ -48,7 +48,6 @@ fn args<'a, 'b>() -> Box<[Arg<'a, 'b>]> {
             .use_delimiter(true)
             // screaming-snake, snake, kebab, camel, pascal, hungarian-notation
             // S, s, k, c, p, h
-            // TODO Notice that camel case is conflict with hungarian-notation option
             .possible_values(&["S", "s", "k", "c", "p", "h"])
             .hide_possible_values(true),
         Arg::with_name("output")

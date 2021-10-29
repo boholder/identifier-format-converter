@@ -152,7 +152,7 @@ mod captor_tests {
     /// [This answer](https://stackoverflow.com/a/400316/11397457)
     /// gives me the special character list for testing.
     #[test]
-    fn can_escape_special_chars_in_user_input() {
+    fn escape_special_chars_in_user_input() {
         let locators = [".", "^", "$", "*", "+",
             "?", "(", ")", "[", "{", r"\", "|"];
         let actual = Captor::escape(&locators);
