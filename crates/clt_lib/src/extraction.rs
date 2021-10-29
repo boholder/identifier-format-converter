@@ -49,7 +49,15 @@ pub struct Captor {
 }
 
 impl Captor {
-    pub fn new<T: AsRef<str>>(before: &[T], after: &[T]) -> Captor {
+    pub fn new(before: Option<Vec<String>>, after: Option<Vec<String>>) -> Captor {
+        let before = before
+            .unwrap_or(vec!["(".to_string(), ",".to_string()]);
+        let after = after
+            .unwrap_or(vec![",".to_string(), ")".to_string(), "=".to_string()]);
+        Captor::new_ins(&before, &after)
+    }
+
+    fn new_ins<T: AsRef<str>>(before: &[T], after: &[T]) -> Captor {
         Captor {
             before_regex: Regex::new(
                 format!(r"(?:{}|\s|\A)([a-zA-Z0-9_-]+)",
@@ -72,12 +80,6 @@ impl Captor {
         ori.into_iter()
             .map(|locator| regex::escape(locator.as_ref()))
             .collect()
-    }
-
-    /// Default captor has common locating symbols 
-    /// for extracting identifiers from sourcecode.
-    pub fn default() -> Captor {
-        Captor::new(&["(", ","], &[",", ")", "="])
     }
 
     /// Extract words from given long text string,
@@ -147,6 +149,8 @@ mod stdin_reader_tests {
 
 #[cfg(test)]
 mod captor_tests {
+    use crate::to_string_vec;
+
     use super::Captor;
 
     /// [This answer](https://stackoverflow.com/a/400316/11397457)
@@ -164,16 +168,15 @@ mod captor_tests {
     #[test]
     fn return_empty_vec_when_no_match() {
         let text = "@can@not@be@matched";
-        let actual = Captor::default().capture_words(text);
+        let actual = Captor::new(None, None).capture_words(text);
         assert!(actual.is_empty())
     }
 
     #[test]
     fn default_captor_works() {
         let text = "w0 (w1 w2,w3 w4= w5) w6";
-        let actual = Captor::default().capture_words(text);
-        let expect: Vec<String> = vec!["w0", "w1", "w2", "w3", "w4", "w5", "w6"].into_iter()
-            .map(|str| str.to_string()).collect();
+        let actual = Captor::new(None, None).capture_words(text);
+        let expect: Vec<String> = to_string_vec(vec!["w0", "w1", "w2", "w3", "w4", "w5", "w6"]);
         assert_eq!(actual, expect);
     }
 
@@ -183,19 +186,17 @@ mod captor_tests {
         let before: Vec<String> = "@#$&".chars().map(|c| c.to_string()).collect();
         let after = before.clone();
 
-        let actual = Captor::new(&before, &after).capture_words(text);
+        let actual = Captor::new(Some(before), Some(after)).capture_words(text);
         // notice that the result is sorted.
-        let expect: Vec<String> = vec!["be", "can", "matched", "now"].into_iter()
-            .map(|str| str.to_string()).collect();
+        let expect: Vec<String> = to_string_vec(vec!["be", "can", "matched", "now"]);
         assert_eq!(actual, expect);
     }
 
     #[test]
     fn duplicating_matches_are_removed() {
         let text = "a b c a b c";
-        let actual = Captor::default().capture_words(text);
-        let expect: Vec<String> = vec!["a", "b", "c"].into_iter()
-            .map(|str| str.to_string()).collect();
+        let actual = Captor::new(None, None).capture_words(text);
+        let expect: Vec<String> = to_string_vec(vec!["a", "b", "c"]);
         assert_eq!(actual, expect);
     }
 }

@@ -11,6 +11,9 @@ mod extraction;
 mod conversion;
 
 lazy_static! {
+    // default option of `--filter` and `--output`, i.e. allow all formats.
+    static ref DEFAULT_OPTIONS: Vec<String> = to_string_vec(vec!["S", "s", "k", "c", "p"]);
+
     // used for converting NamingCase to String type in iteration.
     static ref DIRECT_MAPPERS: HashMap<&'static str, fn(&NamingCase) -> String> = {
         let mut map: HashMap<&'static str, fn(&NamingCase) -> String> = HashMap::new();
@@ -36,4 +39,10 @@ lazy_static! {
         map.insert("p", |case| compose("pascal",case.to_pascal().unwrap()));
         map
     };
+}
+
+fn to_string_vec(ori: Vec<&str>) -> Vec<String> {
+    ori.into_iter()
+        .map(|str| str.to_string())
+        .collect()
 }
