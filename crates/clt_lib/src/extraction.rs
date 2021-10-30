@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fs;
 use std::io::{self, BufRead, Error};
 
@@ -111,12 +112,14 @@ impl Captor {
             .map(|cap| cap[1].to_string())
             .collect();
 
+        // calculate the union of the two result
         let mut union: Vec<String> = before_matches.into_iter()
-            .filter(|word| after_matches.contains(word))
-            .collect();
+            .filter(|word| after_matches.contains(word)).collect();
 
-        union.sort();
-        union.dedup();
+        // dedup while keep the order, what an elegant solution:
+        // https://users.rust-lang.org/t/deduplicate-vector-in-place-while-preserving-order/56568/6
+        let mut set = HashSet::new();
+        union.retain(|word| set.insert(word.clone()));
         union
     }
 }
@@ -188,7 +191,7 @@ mod captor_tests {
 
         let actual = Captor::new(Some(before), Some(after)).capture_words(text);
         // notice that the result is sorted.
-        let expect: Vec<String> = to_string_vec(vec!["be", "can", "matched", "now"]);
+        let expect: Vec<String> = to_string_vec(vec!["now", "can", "be", "matched"]);
         assert_eq!(actual, expect);
     }
 
