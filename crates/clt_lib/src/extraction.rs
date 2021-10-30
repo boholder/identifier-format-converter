@@ -1,12 +1,13 @@
 use std::collections::HashSet;
 use std::fs;
-use std::io::{self, BufRead, Error};
+use std::io::{self, BufRead};
 
 use regex::{self, Regex};
 
 /// Convert Vec<String> into a slice of &str in Rust? :
 /// https://stackoverflow.com/a/41180422/11397457
-pub fn read_from_files<T: AsRef<str>>(files: &[T], eof: Option<&str>) -> io::Result<String> {
+pub fn read_from_files<T: AsRef<str>>(files: &[T], eof: Option<&str>)
+                                      -> Result<String, String> {
     let mut text = String::new();
     for file in files {
         text.push(' ');
@@ -15,31 +16,35 @@ pub fn read_from_files<T: AsRef<str>>(files: &[T], eof: Option<&str>) -> io::Res
     Ok(text)
 }
 
-fn read_file(file: &str, eof: Option<&str>) -> io::Result<String> {
-    let text = fs::read_to_string(file)?;
-    apply_eof_on_text(eof, text)
+fn read_file(file: &str, eof: Option<&str>) -> Result<String, String> {
+    match fs::read_to_string(file) {
+        Ok(text) => { Ok(apply_eof_on_text(eof, text)) }
+        Err(msg) => { Err(format!("naming: {}: {}", file, msg)) }
+    }
 }
 
-fn apply_eof_on_text(eof: Option<&str>, text: String) -> Result<String, Error> {
+fn apply_eof_on_text(eof: Option<&str>, text: String) -> String {
     match eof {
-        None => { Ok(text) }
+        None => { text }
         Some(eof) => {
             let position = text.find(eof);
-            Ok(text[..position.unwrap_or_else(|| text.len())].to_string())
+            text[..position.unwrap_or_else(|| text.len())].to_string()
         }
     }
 }
 
-pub fn read_from_std_in(eof: Option<&str>) -> io::Result<String> {
+pub fn read_from_std_in(eof: Option<&str>) -> Result<String, String> {
     read_from_input(io::stdin().lock(), eof)
 }
 
 /// How to test stdin https://stackoverflow.com/a/28370712/11397457
-fn read_from_input<R>(mut input: R, eof: Option<&str>) -> io::Result<String>
+fn read_from_input<R>(mut input: R, eof: Option<&str>) -> Result<String, String>
     where R: BufRead {
     let mut buffer = String::new();
-    input.read_to_string(&mut buffer)?;
-    apply_eof_on_text(eof, buffer)
+    match input.read_to_string(&mut buffer) {
+        Ok(_) => { Ok(apply_eof_on_text(eof, buffer)) }
+        Err(msg) => { Err(format!("naming: stdin: {}", msg)) }
+    }
 }
 
 /// Answer user's `--before`, `--after` options,
