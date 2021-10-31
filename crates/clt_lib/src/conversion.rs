@@ -49,19 +49,20 @@ impl Filter {
             ("h", naming::is_camel),
             ("p", naming::is_pascal)];
 
-    fn filter_words_with_options(&self, words: Vec<String>) -> Vec<String> {
+    fn filter_words_with_options(&self, mut words: Vec<String>) -> Vec<String> {
         let predicates: Vec<fn(&str) -> bool> = Filter::PREDICATES.iter()
             .filter(|(opt, _)| self.options.contains(&opt.to_string()))
             .map(|(_, f)| *f).collect();
 
-        words.into_iter()
-            .filter(|word| {
-                // check if word's format belongs to one of predicates
-                predicates.iter()
-                    .map(|f| f(word))
-                    .reduce(|a, b| a || b)
-                    .unwrap()
-            }).collect()
+        words.retain(|word| { Filter::is_one_of_formats(&predicates, word) });
+        words
+    }
+
+    fn is_one_of_formats(predicates: &Vec<fn(&str) -> bool>, word: &String) -> bool {
+        predicates.iter()
+            .map(|f| f(word))
+            .reduce(|a, b| a || b)
+            .unwrap()
     }
 }
 

@@ -66,12 +66,14 @@ impl Captor {
     fn new_ins<T: AsRef<str>>(before: &[T], after: &[T]) -> Captor {
         Captor {
             before_regex: Regex::new(
+                // \A for start of file position
                 format!(r"(?:{}|\s|\A)([a-zA-Z0-9_-]+)",
                         Captor::escape(before).join("|")
                 ).as_str()
             ).unwrap(),
 
             after_regex: Regex::new(
+                // \z for end of file position
                 format!(r"([a-zA-Z0-9_-]+)(?:{}|\s|\z)",
                         Captor::escape(after).join("|")
                 ).as_str()
@@ -107,7 +109,7 @@ impl Captor {
         // So I use two expressions to match the input text,
         // and calculate the union of the two result set.
 
-        let before_matches: Vec<String> = self.before_regex.captures_iter(text)
+        let mut before_matches: Vec<String> = self.before_regex.captures_iter(text)
             .into_iter()
             .map(|cap| cap[1].to_string())
             .collect();
@@ -118,14 +120,13 @@ impl Captor {
             .collect();
 
         // calculate the union of the two result
-        let mut union: Vec<String> = before_matches.into_iter()
-            .filter(|word| after_matches.contains(word)).collect();
+        before_matches.retain(|word| after_matches.contains(word));
 
         // dedup while keep the order, what an elegant solution:
         // https://users.rust-lang.org/t/deduplicate-vector-in-place-while-preserving-order/56568/6
         let mut set = HashSet::new();
-        union.retain(|word| set.insert(word.clone()));
-        union
+        before_matches.retain(|word| set.insert(word.clone()));
+        before_matches
     }
 }
 
@@ -184,7 +185,8 @@ mod captor_tests {
     fn default_captor_works() {
         let text = "w0 (w1 w2,w3 w4= w5) w6";
         let actual = Captor::new(None, None).capture_words(text);
-        let expect: Vec<String> = to_string_vec(vec!["w0", "w1", "w2", "w3", "w4", "w5", "w6"]);
+        let expect: Vec<String> =
+            to_string_vec(vec!["w0", "w1", "w2", "w3", "w4", "w5", "w6"]);
         assert_eq!(actual, expect);
     }
 
@@ -194,7 +196,8 @@ mod captor_tests {
         let before: Vec<String> = "@#$&".chars().map(|c| c.to_string()).collect();
         let after = before.clone();
 
-        let actual = Captor::new(Some(before), Some(after)).capture_words(text);
+        let actual =
+            Captor::new(Some(before), Some(after)).capture_words(text);
         // notice that the result is sorted.
         let expect: Vec<String> = to_string_vec(vec!["now", "can", "be", "matched"]);
         assert_eq!(actual, expect);
