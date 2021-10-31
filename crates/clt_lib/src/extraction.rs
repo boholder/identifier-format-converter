@@ -4,6 +4,8 @@ use std::io::{self, BufRead};
 
 use regex::{self, Regex};
 
+use crate::to_string_vec;
+
 /// Convert Vec<String> into a slice of &str in Rust? :
 /// https://stackoverflow.com/a/41180422/11397457
 pub fn read_from_files<T: AsRef<str>>(files: &[T], eof: Option<&str>)
@@ -55,39 +57,28 @@ pub struct Captor {
 }
 
 impl Captor {
+    /// TODO options should be manually escaped by user.
     pub fn new(before: Option<Vec<String>>, after: Option<Vec<String>>) -> Captor {
-        let before = before
-            .unwrap_or(vec!["(".to_string(), ",".to_string()]);
-        let after = after
-            .unwrap_or(vec![",".to_string(), ")".to_string(), "=".to_string()]);
-        Captor::new_ins(&before, &after)
-    }
+        // Default pass \s (already in pattern string) again
+        // to avoid regex (?:|\s|\A)([a-zA-Z0-9_-]+)
+        // where first group can match anything
+        // due to first alternative choice is empty.
+        let before_options = before.unwrap_or(
+            vec![r"\s".to_string()]);
+        let after_options = after.unwrap_or(
+            to_string_vec(vec![r"\s*=", r"\s*;"]));
 
-    fn new_ins<T: AsRef<str>>(before: &[T], after: &[T]) -> Captor {
         Captor {
             before_regex: Regex::new(
                 // \A for start of file position
-                format!(r"(?:{}|\s|\A)([a-zA-Z0-9_-]+)",
-                        Captor::escape(before).join("|")
-                ).as_str()
+                &format!(r"(?:{}|\A)([a-zA-Z0-9_-]+)", before_options.join("|"))
             ).unwrap(),
 
             after_regex: Regex::new(
                 // \z for end of file position
-                format!(r"([a-zA-Z0-9_-]+)(?:{}|\s|\z)",
-                        Captor::escape(after).join("|")
-                ).as_str()
+                &format!(r"([a-zA-Z0-9_-]+)(?:{}|\z)", after_options.join("|"))
             ).unwrap(),
         }
-    }
-
-    /// We needs to escape
-    /// outside character classes characters that in user input
-    /// for constructing regular expression.
-    fn escape<T: AsRef<str>>(ori: &[T]) -> Vec<String> {
-        ori.into_iter()
-            .map(|locator| regex::escape(locator.as_ref()))
-            .collect()
     }
 
     /// Extract words from given long text string,
@@ -162,38 +153,27 @@ mod captor_tests {
 
     use super::Captor;
 
-    /// [This answer](https://stackoverflow.com/a/400316/11397457)
-    /// gives me the special character list for testing.
-    #[test]
-    fn escape_special_chars_in_user_input() {
-        let locators = [".", "^", "$", "*", "+",
-            "?", "(", ")", "[", "{", r"\", "|"];
-        let actual = Captor::escape(&locators);
-        let expect = [r"\.", r"\^", r"\$", r"\*", r"\+",
-            r"\?", r"\(", r"\)", r"\[", r"\{", r"\\", r"\|"];
-        assert_eq!(actual, expect);
-    }
-
     #[test]
     fn return_empty_vec_when_no_match() {
         let text = "@can@not@be@matched";
         let actual = Captor::new(None, None).capture_words(text);
-        assert!(actual.is_empty())
+        assert_eq!(actual, Vec::<String>::new())
     }
 
     #[test]
     fn default_captor_works() {
-        let text = "w0 (w1 w2,w3 w4= w5) w6";
+        let text = "int i = 1; String s = oneMethod(arg1, arg2);";
         let actual = Captor::new(None, None).capture_words(text);
         let expect: Vec<String> =
-            to_string_vec(vec!["w0", "w1", "w2", "w3", "w4", "w5", "w6"]);
+            to_string_vec(vec!["i", "1", "s"]);
         assert_eq!(actual, expect);
     }
 
     #[test]
     fn custom_captor_works() {
         let text = "@now#can$be&matched";
-        let before: Vec<String> = "@#$&".chars().map(|c| c.to_string()).collect();
+        // note that "$" is manually escaped.
+        let before: Vec<String> = to_string_vec(vec!["@", "#", r"\$", "&"]);
         let after = before.clone();
 
         let actual =
@@ -205,9 +185,10 @@ mod captor_tests {
 
     #[test]
     fn duplicating_matches_are_removed() {
-        let text = "a b c a b c";
+        let text = "let a = 1; let b = 2; let c = 3;\n\
+         let a = 1; let b = 2; let c = 3;";
         let actual = Captor::new(None, None).capture_words(text);
-        let expect: Vec<String> = to_string_vec(vec!["a", "b", "c"]);
+        let expect: Vec<String> = to_string_vec(vec!["a", "1", "b", "2", "c", "3"]);
         assert_eq!(actual, expect);
     }
 }

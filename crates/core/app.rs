@@ -32,7 +32,7 @@ EXAMPLE:
 
     # 3. change one identifier from camelCase to snake_case
     $ echo \"pageSize\" | naming --output=s | \\
-      xargs -l -t -- bash -c 'sed -i \"s/$0/$1/g\" mapper.java'
+      xargs -l -t -- bash -c 'sed -i \"s/$0/$1/g\" IbatisMapper.xml'
     bash -c 'sed -i \"s/$0/$1/g\" mapper.java' pageSize page_size";
 
 fn args<'a, 'b>() -> Box<[Arg<'a, 'b>]> {
@@ -41,8 +41,6 @@ fn args<'a, 'b>() -> Box<[Arg<'a, 'b>]> {
             .short("f")
             .long("filter")
             .help("Set formats to be extracted.")
-            // TODO 给每个参数加长介绍。
-            .long_help("aaaa")
             .takes_value(true)
             .multiple(true)
             .use_delimiter(true)
@@ -69,16 +67,14 @@ fn args<'a, 'b>() -> Box<[Arg<'a, 'b>]> {
         Arg::with_name("before")
             .short("b")
             .long("before")
-            .help("Set non-whitespace characters before identifiers; \
-            default(2): \"(\" \",\"")
+            .help(r#"Set locators before identifiers; default(1): "\s""#)
             .takes_value(true)
             .multiple(true)
             .use_delimiter(true),
         Arg::with_name("after")
             .short("a")
             .long("after")
-            .help("Set non-whitespace characters after identifiers; \
-            default(3): \"=\" \")\" \",\"")
+            .help(r#"Set locators after identifiers; default(2): "\s*=" "\s*;""#)
             .takes_value(true)
             .multiple(true)
             .use_delimiter(true),

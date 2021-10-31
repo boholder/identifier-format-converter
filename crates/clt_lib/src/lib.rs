@@ -42,7 +42,7 @@ lazy_static! {
 }
 
 fn to_string_vec(ori: Vec<&str>) -> Vec<String> {
-    ori.into_iter()
+    ori.iter()
         .map(|str| str.to_string())
         .collect()
 }

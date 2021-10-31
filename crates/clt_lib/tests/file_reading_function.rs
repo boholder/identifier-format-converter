@@ -1,3 +1,5 @@
+// These tests test the ability to get the original text from files.
+
 use clt_lib as lib;
 
 #[test]
