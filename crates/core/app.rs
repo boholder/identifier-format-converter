@@ -64,17 +64,12 @@ fn args<'a, 'b>() -> Box<[Arg<'a, 'b>]> {
             .long("eof")
             .help("Set logical EOF string; if occurs, the rest of the input is ignored.")
             .takes_value(true),
-        Arg::with_name("before")
-            .short("b")
-            .long("before")
-            .help(r#"Set locators before identifiers; default(1): "\s""#)
-            .takes_value(true)
-            .multiple(true)
-            .use_delimiter(true),
-        Arg::with_name("after")
-            .short("a")
-            .long("after")
-            .help(r#"Set locators after identifiers; default(2): "\s*=" "\s*;""#)
+        Arg::with_name("locator")
+            .short("l")
+            .long("locator")
+            .help("Set locator pairs around identifiers, \
+                the separator between prefix and suffix is a space; \
+                default(1): \"\\s \\s\"")
             .takes_value(true)
             .multiple(true)
             .use_delimiter(true),

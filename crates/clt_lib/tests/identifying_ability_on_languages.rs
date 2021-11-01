@@ -18,7 +18,9 @@ fn java() {
     // java variables are in camel case.
     let actual = Filter::new(Some(vec!["c".to_string()]))
         .unwrap().to_naming_cases_from(
-        Captor::new(None, None).capture_words(&text)
+        Captor::new(
+            Some(lib::to_string_vec(vec![r"\s \s*=", r"\s \s*;"]))
+        ).unwrap().capture_words(text)
     );
 
     // =========================Failure:
@@ -28,8 +30,8 @@ fn java() {
     // with common assignment statements like
     // line 51: "private String name;"
     let expect = to_naming_case_vec(Box::from(
-        ["data", "count", "targetIsLive", "liveNeighborCount", "rowSize",
-            "colSize", "name", "category"]));
+        ["count", "targetIsLive", "liveNeighborCount", "rowSize",
+            "colSize", "data", "name", "category"]));
 
     assert_eq!(actual, expect);
 }
@@ -47,7 +49,9 @@ fn javascript() {
     // variables in example file are in camel case.
     let actual = Filter::new(Some(vec!["c".to_string()]))
         .unwrap().to_naming_cases_from(
-        Captor::new(None, None).capture_words(&text)
+        Captor::new(
+            Some(lib::to_string_vec(vec![r"\s \s*=", r"\s \s*;"]))
+        ).unwrap().capture_words(text)
     );
 
     // =========================Failure:

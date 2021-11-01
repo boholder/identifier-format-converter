@@ -4,16 +4,13 @@ use std::io::{self, BufRead};
 
 use regex::{self, Regex};
 
-use crate::to_string_vec;
-
-/// Convert Vec<String> into a slice of &str in Rust? :
+/// Convert Vec<String> into a slice of &str in Rust:
 /// https://stackoverflow.com/a/41180422/11397457
 pub fn read_from_files<T: AsRef<str>>(files: &[T], eof: Option<&str>)
-                                      -> Result<String, String> {
-    let mut text = String::new();
+                                      -> Result<Vec<String>, String> {
+    let mut text = Vec::new();
     for file in files {
-        text.push(' ');
-        text.push_str(&read_file(file.as_ref(), eof)?);
+        text.push(read_file(file.as_ref(), eof)?);
     };
     Ok(text)
 }
@@ -49,75 +46,61 @@ fn read_from_input<R>(mut input: R, eof: Option<&str>) -> Result<String, String>
     }
 }
 
-/// Answer user's `--before`, `--after` options,
+/// Answer user's `--locator` options,
 /// capture words that match the options from given long text.
 pub struct Captor {
-    before_regex: Regex,
-    after_regex: Regex,
+    patterns: Vec<Regex>,
 }
 
 impl Captor {
-    /// TODO options should be manually escaped by user.
-    pub fn new(before: Option<Vec<String>>, after: Option<Vec<String>>) -> Captor {
-        // Default pass \s (already in pattern string) again
-        // to avoid regex (?:|\s|\A)([a-zA-Z0-9_-]+)
-        // where first group can match anything
-        // due to first alternative choice is empty.
-        let before_options = before.unwrap_or(
-            vec![r"\s".to_string()]);
-        let after_options = after.unwrap_or(
-            to_string_vec(vec![r"\s*=", r"\s*;"]));
+    /// Options should be manually escaped by user.
+    /// If there is a locator pair which couldn't be converted to regex, return an Err.
+    pub fn new(locators: Option<Vec<String>>) -> Result<Captor, String> {
+        let locators = locators.unwrap_or(
+            vec![r"\s \s".to_string()]);
 
-        Captor {
-            before_regex: Regex::new(
-                // \A for start of file position
-                &format!(r"(?:{}|\A)([a-zA-Z0-9_-]+)", before_options.join("|"))
-            ).unwrap(),
+        let mut patterns = Vec::new();
 
-            after_regex: Regex::new(
+        for locator in locators {
+            let pair = locator.split_once(" ");
+            if let None = pair {
+                return Err(format!(
+                    "naming: locator `{}`: can't build locator pair from this.", locator));
+            }
+            let pair = pair.unwrap();
+
+            patterns.push(Regex::new(
+                // \A for start of file position,
                 // \z for end of file position
-                &format!(r"([a-zA-Z0-9_-]+)(?:{}|\z)", after_options.join("|"))
-            ).unwrap(),
+                &format!(r"(?:{}|\A)([a-zA-Z0-9_-]+)(?:{}|\z)",
+                         pair.0, pair.1)
+            ).unwrap());
         }
+
+        Ok(Captor { patterns })
     }
 
     /// Extract words from given long text string,
     /// with regular expression and given locating prefix & suffix.
-    pub fn capture_words(&self, text: &str) -> Vec<String> {
-        // When testing and reading documents of library "regex",
-        // I found out that it executes match & capture in a "non-overlapping" way.
-        //
-        // which means a code line without formatting (auto-inserted spaces) like this:
-        // ```
-        // // String s = oneMethod(arg1,arg2);
-        // //                       ^    ^
-        // ```
-        // Library "regex" couldn't match both `arg1` and `arg2`,
-        // if I use a expression like: `(?:\(|,)([a-z0-9])(?:\)|,)`,
-        // because `arg1` and `arg2` shares a common comma symbol between them,
-        // which is demanded by expression.
-        //
-        // So I use two expressions to match the input text,
-        // and calculate the union of the two result set.
-
-        let mut before_matches: Vec<String> = self.before_regex.captures_iter(text)
-            .into_iter()
-            .map(|cap| cap[1].to_string())
-            .collect();
-
-        let after_matches: Vec<String> = self.after_regex.captures_iter(text)
-            .into_iter()
-            .map(|cap| cap[1].to_string())
-            .collect();
-
-        // calculate the union of the two result
-        before_matches.retain(|word| after_matches.contains(word));
+    pub fn capture_words(&self, text: Vec<String>) -> Vec<String> {
+        // apply matching on each file's content
+        let mut matches: Vec<String> = text.iter()
+            .map(|text| {
+                // for each file's content, apply all patterns on it.
+                self.patterns.iter()
+                    .map(move |pattern| {
+                        pattern.captures_iter(text)
+                            .into_iter()
+                            .map(|cap| cap[1].to_string())
+                    }).flatten()
+                // now get one file's matches
+            }).flatten().collect();
 
         // dedup while keep the order, what an elegant solution:
         // https://users.rust-lang.org/t/deduplicate-vector-in-place-while-preserving-order/56568/6
         let mut set = HashSet::new();
-        before_matches.retain(|word| set.insert(word.clone()));
-        before_matches
+        matches.retain(|word| set.insert(word.clone()));
+        matches
     }
 }
 
@@ -155,40 +138,45 @@ mod captor_tests {
 
     #[test]
     fn return_empty_vec_when_no_match() {
-        let text = "@can@not@be@matched";
-        let actual = Captor::new(None, None).capture_words(text);
+        let text = to_string_vec(vec!["@can@not@be@matched"]);
+        let actual = Captor::new(None).unwrap().capture_words(text);
         assert_eq!(actual, Vec::<String>::new())
     }
 
     #[test]
     fn default_captor_works() {
-        let text = "int i = 1; String s = oneMethod(arg1, arg2);";
-        let actual = Captor::new(None, None).capture_words(text);
+        let text = to_string_vec(
+            vec!["int i = 1; String s = oneMethod(arg1, arg2);"]);
+        let actual = Captor::new(
+            Some(to_string_vec(vec![r"\s \s*=", r"\s \s*;"]))
+        ).unwrap().capture_words(text);
         let expect: Vec<String> =
-            to_string_vec(vec!["i", "1", "s"]);
+            to_string_vec(vec!["i", "s", "1"]);
         assert_eq!(actual, expect);
     }
 
     #[test]
     fn custom_captor_works() {
-        let text = "@now#can$be&matched";
+        let text = to_string_vec(vec!["@now#can$be&matched"]);
         // note that "$" is manually escaped.
-        let before: Vec<String> = to_string_vec(vec!["@", "#", r"\$", "&"]);
-        let after = before.clone();
+        let locators: Vec<String> = to_string_vec(vec![r"# \$", "@ #", r"\$ &", r"& \z"]);
 
         let actual =
-            Captor::new(Some(before), Some(after)).capture_words(text);
-        // notice that the result is sorted.
-        let expect: Vec<String> = to_string_vec(vec!["now", "can", "be", "matched"]);
+            Captor::new(Some(locators)).unwrap().capture_words(text);
+        // notice that the result order is based on option order.
+        let expect: Vec<String> = to_string_vec(vec!["can", "now", "be", "matched"]);
         assert_eq!(actual, expect);
     }
 
     #[test]
     fn duplicating_matches_are_removed() {
-        let text = "let a = 1; let b = 2; let c = 3;\n\
-         let a = 1; let b = 2; let c = 3;";
-        let actual = Captor::new(None, None).capture_words(text);
-        let expect: Vec<String> = to_string_vec(vec!["a", "1", "b", "2", "c", "3"]);
+        let text = to_string_vec(vec!["let a = 1; let b = 2; let c = 3;",
+                                      "let a = 1; let b = 2; let c = 3;"]);
+        let actual = Captor::new(
+            Some(to_string_vec(vec![r"\s \s*=", r"\s \s*;"]))
+        ).unwrap().capture_words(text);
+        // notice that the result order is based on option order.
+        let expect: Vec<String> = to_string_vec(vec!["a", "b", "c", "1", "2", "3"]);
         assert_eq!(actual, expect);
     }
 }

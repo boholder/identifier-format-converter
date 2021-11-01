@@ -6,7 +6,6 @@ description = """
 Extract and convert the naming format(case|notation) of identifiers from files.
 Use this tool to prepare identifier name strings for further operations
 (matching,replacing...) on relative files.
-It is recommended to use this tool in combination with "xargs".
 """
 documentation = "https://github.com/boholder/naming"
 homepage = "https://github.com/boholder/naming"
@@ -37,6 +36,7 @@ features = ["suggestions", "color", "vec_map", "wrap_help"]
 
 [dev-dependencies]
 assert_cmd = "~2.0.2"
+predicates = "~2.0.3"
 
 [profile.release]
 debug = 1

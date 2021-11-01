@@ -1,0 +1,5 @@
+SCREAMING_SNAKE
+snake_case
+kebab-case
+camelCase
+PascalCase

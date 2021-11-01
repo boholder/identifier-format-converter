@@ -14,7 +14,7 @@ impl Filter {
         let options = options.unwrap_or(super::DEFAULT_OPTIONS.clone());
 
         if Filter::has_hungarian_camel_conflict(&options) {
-            return Err("naming: In option \"--filter\", at most one of the two, \
+            return Err("naming: In option `--filter`, at most one of the two, \
             hungarian notation (h) and camel case (c) can appear.");
         }
         Ok(Filter { options })
