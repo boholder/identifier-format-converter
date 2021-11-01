@@ -28,6 +28,7 @@ members = [
 
 [dependencies]
 clt_lib = { path = "crates/clt_lib" }
+atty = "~0.2.14"
 
 [dependencies.clap]
 version = "~2.33"

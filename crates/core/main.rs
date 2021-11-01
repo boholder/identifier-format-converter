@@ -21,10 +21,16 @@ fn main() {
 }
 
 /// A wrapper that does everything from user input to output.
-pub fn operate(matches: ArgMatches) -> Result<String, Box<dyn Error>> {
+fn operate(matches: ArgMatches) -> Result<String, Box<dyn Error>> {
     let eof = matches.value_of("eof");
     let text = match matches.values_of_lossy("files") {
-        None => { vec![read_from_std_in(eof)?] }
+        None => {
+            if is_atty_stdin() {
+                return Err("naming: no input was found. Enter -h or --help for help information.")?;
+            } else {
+                vec![read_from_std_in(eof)?]
+            }
+        }
         Some(files) => { read_from_files(&files, eof)? }
     };
 
@@ -50,4 +56,8 @@ pub fn operate(matches: ArgMatches) -> Result<String, Box<dyn Error>> {
     } else {
         Ok(convertor.into_lines())
     }
+}
+
+fn is_atty_stdin() -> bool {
+    atty::is(atty::Stream::Stdin)
 }

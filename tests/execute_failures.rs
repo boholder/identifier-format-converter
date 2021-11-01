@@ -30,9 +30,9 @@ fn filter_option_has_hungarian_camel_conflict() {
 #[test]
 fn wrong_locator_that_can_not_be_converted_to_regex() {
     let mut cmd = Command::cargo_bin("naming").unwrap();
-    cmd.arg("-l=\"a\"").assert().failure();
-    cmd.arg("-l=\"a \"").assert().failure();
-    cmd.arg("-l=\" a\"").assert().failure();
+    cmd.arg(r#"-l="a""#).assert().failure();
+    cmd.arg(r#"-l="a ""#).assert().failure();
+    cmd.arg(r#"-l=" a""#).assert().failure();
 
     let err_msg = cmd.output().unwrap().stderr;
     let err_msg = String::from_utf8_lossy(&err_msg);
