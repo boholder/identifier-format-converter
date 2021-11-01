@@ -4,7 +4,11 @@ pub fn app() -> App<'static, 'static> {
     App::new("naming")
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
-        .about(ABOUT)
+        // https://github.com/clap-rs/clap/issues/1472
+        // can't works until 3.0
+        .about(env!("CARGO_PKG_DESCRIPTION"))
+        .long_about(ABOUT)
+        .after_help(AFTER_HELP)
         .args(&args())
 }
 
@@ -20,20 +24,21 @@ Check the [homepage] for more information:
 Feel free to submit new [issues] when you found a bug or have suggestions:
 -> https://github.com/boholder/naming/issues/new
 
-Use -h for a brief help information, and --help for a more detailed version.
+Use -h for a brief help information, and --help for a more detailed version.";
 
+const AFTER_HELP: &str = "\
 EXAMPLE:
-    # 1. default output all 5 format conventions, starts with origin input
-    $ echo \"pageSize\" | naming
-    pageSize PAGE_SIZE page_size page-size pageSize PageSize
+    1. default output all 5 format conventions, starts with origin input
+        $ echo \"pageSize\" | naming
+        pageSize PAGE_SIZE page_size page-size pageSize PageSize
 
-    # 2. search all positions of one identifier
-    $ echo \"pageSize\" | naming | xargs -n1 -I {} -- grep -r {} src_dir
+    2. search all positions of one identifier
+        $ echo \"pageSize\" | naming | xargs -n1 -I {} -- grep -r {} src_dir
 
-    # 3. change one identifier from camelCase to snake_case
-    $ echo \"pageSize\" | naming --output=s | \\
-      xargs -l -t -- bash -c 'sed -i \"s/$0/$1/g\" IbatisMapper.xml'
-    bash -c 'sed -i \"s/$0/$1/g\" mapper.java' pageSize page_size";
+    3. change one identifier from camelCase to snake_case
+        $ echo \"pageSize\" | naming --output=s | \\
+            xargs -l -t -- bash -c 'sed -i \"s/$0/$1/g\" IbatisMapper.xml'
+        bash -c 'sed -i \"s/$0/$1/g\" mapper.java' pageSize page_size (<-- xargs -t output)";
 
 fn args<'a, 'b>() -> Box<[Arg<'a, 'b>]> {
     vec![
@@ -47,17 +52,6 @@ fn args<'a, 'b>() -> Box<[Arg<'a, 'b>]> {
             // screaming-snake, snake, kebab, camel, pascal, hungarian-notation
             // S, s, k, c, p, h
             .possible_values(&["S", "s", "k", "c", "p", "h"])
-            .hide_possible_values(true),
-        Arg::with_name("output")
-            .short("o")
-            .long("output")
-            .help("Set formats to be converted to.")
-            .takes_value(true)
-            .multiple(true)
-            .use_delimiter(true)
-            // can't output hungarian notation format
-            // so there is no "h" value
-            .possible_values(&["S", "s", "k", "c", "p"])
             .hide_possible_values(true),
         Arg::with_name("eof")
             .short("e")
@@ -73,6 +67,17 @@ fn args<'a, 'b>() -> Box<[Arg<'a, 'b>]> {
             .takes_value(true)
             .multiple(true)
             .use_delimiter(true),
+        Arg::with_name("output")
+            .short("o")
+            .long("output")
+            .help("Set formats to be converted to.")
+            .takes_value(true)
+            .multiple(true)
+            .use_delimiter(true)
+            // can't output hungarian notation format
+            // so there is no "h" value
+            .possible_values(&["S", "s", "k", "c", "p"])
+            .hide_possible_values(true),
         Arg::with_name("json")
             .long("json")
             .help("Output in json format"),
