@@ -1,5 +1,5 @@
 use assert_cmd::Command;
-use predicates::{Predicate, str as it};
+use predicates::{str as it, Predicate};
 
 #[test]
 fn no_input() {

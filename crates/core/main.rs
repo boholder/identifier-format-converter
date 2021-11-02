@@ -26,23 +26,27 @@ fn operate(matches: ArgMatches) -> Result<String, Box<dyn Error>> {
     let text = match matches.values_of_lossy("files") {
         None => {
             if is_atty_stdin() {
-                return Err("naming: no input was found. Enter -h or --help for help information.")?;
+                return Err(
+                    "naming: no input was found. Enter -h or --help for help information.".into()
+                );
             } else {
                 vec![read_from_std_in(eof)?]
             }
         }
-        Some(files) => { read_from_files(&files, eof)? }
+        Some(files) => read_from_files(&files, eof)?,
     };
 
-    let option = |tag: &str| { matches.values_of_lossy(tag) };
+    let option = |tag: &str| matches.values_of_lossy(tag);
 
     // text (String) --Captor--> words (Vec<String>)
     // --Filter--> intermediate type instances (Vec<NamingCase>)
     // --> Convertor (ready to convert itself into different format outputs)
-    let convertor =
-        Convertor::new(option("output"),
-                       Filter::new(option("filter"))?.to_naming_cases_from(
-                           Captor::new(option("locator"))?.capture_words(text)));
+    let convertor = Convertor::new(
+        option("output"),
+        Filter::new(option("filter"))?.to_naming_cases_from(
+            Captor::new(option("locator"))?.capture_words(text),
+        ),
+    );
 
     let json_flag_is_passed = matches.is_present("json");
     let regex_flag_is_passed = matches.is_present("regex");

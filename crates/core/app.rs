@@ -64,9 +64,11 @@ fn args<'a, 'b>() -> Box<[Arg<'a, 'b>]> {
             .short("l")
             .long("locator")
             .long_help(LOCATOR_HELP)
-            .help("Set locator pairs around identifiers, \
+            .help(
+                "Set locator pairs around identifiers, \
                 the separator between prefix and suffix is a space; \
-                default(1): \"\\s \\s\"")
+                default(1): \"\\s \\s\"",
+            )
             .takes_value(true)
             .multiple(true)
             .use_delimiter(true),
@@ -93,7 +95,8 @@ fn args<'a, 'b>() -> Box<[Arg<'a, 'b>]> {
         Arg::with_name("files")
             .help("pass file names, or directly pass text via shell pipe")
             .multiple(true),
-    ].into_boxed_slice()
+    ]
+    .into_boxed_slice()
 }
 
 const FILTER_HELP: &str = "\
