@@ -37,11 +37,11 @@ fn locator() {
 #[test]
 fn locator_invalid_when_single_valid_word_appears_in_special_position() {
     let mut cmd = Command::cargo_bin("naming").unwrap();
-    // note that in one.txt, word "userId " has a space after it.
-    // TODO if remove that space, the hardcoded pair "\A(word)\z"
+    // Note that in one.txt, word "userId " has a space after it.
+    // If remove that space, the hardcoded pair "\A(word)\z"
     // will match the "userId" because:
     // 1. it's a valid word
-    // 2. it's head position is "head of file" (\A),
+    // 2. it's head position is "start of file" (\A),
     //    and tail position is "end of file" (\z)
     cmd.arg(format!(r#"--locator="\s Id""#)).arg("tests/data/one.txt").assert().success()
         .stdout("userId USER_ID user_id user-id userId UserId");
