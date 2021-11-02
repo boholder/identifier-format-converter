@@ -3,14 +3,14 @@ name = "naming_clt"
 version = "1.0.0"
 authors = ["Boholder <bottleholder@anche.no>"]
 description = """
-Extract and convert the naming format(case|notation) of identifiers from files.
+Extract and convert the naming format(case|notation) of identifiers from files or stdin.
 Use this tool to prepare identifier name strings for further operations
 (matching,replacing...) on relative files.
 """
 documentation = "https://github.com/boholder/naming"
 homepage = "https://github.com/boholder/naming"
 repository = "https://github.com/boholder/naming"
-keywords = ["source", "code", "naming", "format"]
+keywords = ["code", "search", "pattern"]
 categories = ["command-line-utilities", "text-processing"]
 license = "MIT"
 edition = "2018"

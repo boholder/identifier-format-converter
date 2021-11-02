@@ -48,7 +48,7 @@ fn locator_invalid_when_single_valid_word_appears_in_special_position() {
 }
 
 #[test]
-fn output__option_order_affects_output_order() {
+fn output_option_order_affects_output_order() {
     let mut cmd = Command::cargo_bin("naming").unwrap();
     cmd.arg("--output=c,s").arg("tests/data/one.txt").assert().success()
         .stdout("userId userId user_id");
@@ -95,6 +95,6 @@ fn output_json() {
     let mut cmd = Command::cargo_bin("naming").unwrap();
     cmd.arg("--output=k,S").arg("--json").arg("tests/data/one.txt")
         .assert().success()
-        .stdout(r#"{"result":[{"origin":"userId","# +
-            r#"""kebab":"user-id","screaming_snake":"USER_ID"}]}"#);
+        .stdout(r#"{"result":[{"origin":"userId","#.to_string() +
+            r#""kebab":"user-id","screaming_snake":"USER_ID"}]}"#);
 }

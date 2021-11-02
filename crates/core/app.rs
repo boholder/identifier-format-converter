@@ -137,9 +137,13 @@ to the line contains given eof-word, to this tool.
 const LOCATOR_HELP: &str = "\
 Set locator pairs around identifiers, in each pair value,
 the delimiter between prefix and suffix is a space.
-The two part
 Default(1): \"\\s \\s\", which will match the valid identifiers
 separated by white characters.
+
+The two parts of a pair are inserted directly into the
+regular pattern, so users need to manually escape the characters
+that need to be escaped. For the regex syntax, check the doc:
+-> https://docs.rs/regex/1.5.4/regex/index.html#syntax
 
 Each value passed to this option will be transformed to an regex
 pattern looks like: \"(?:<prefix>|\\A)(identifier)(?:<suffix>|\\z)\",
