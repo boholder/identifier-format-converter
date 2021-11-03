@@ -282,9 +282,9 @@ mod filter_tests {
             "PascalCase",
             "-invalid_",
         ]
-            .into_iter()
-            .map(|s| s.to_string())
-            .collect();
+        .into_iter()
+        .map(|s| s.to_string())
+        .collect();
 
         let mut expect = words.clone();
         // remove the invalid word at tail
@@ -314,9 +314,9 @@ mod filter_tests {
             "PascalCase",
             "-invalid_",
         ]
-            .into_iter()
-            .map(|s| s.to_string())
-            .collect();
+        .into_iter()
+        .map(|s| s.to_string())
+        .collect();
 
         let actual =
             Filter::new(Some(options)).unwrap().to_naming_cases_from(words);
@@ -389,10 +389,10 @@ PascalCase PASCAL_CASE pascal_case pascal-case pascalCase PascalCase";
         let actual = Convertor::new(Some(options), cases).into_json();
 
         let expect = concat!(
-        r#"{"result":[{"origin":"snake_case","screaming_snake":"SNAKE_CASE","snake":"snake_case","#,
-        r#""kebab":"snake-case","camel":"snakeCase","pascal":"SnakeCase"},"#,
-        r#"{"origin":"kebab-case","screaming_snake":"KEBAB_CASE","snake":"kebab_case","#,
-        r#""kebab":"kebab-case","camel":"kebabCase","pascal":"KebabCase"}]}"#
+            r#"{"result":[{"origin":"snake_case","screaming_snake":"SNAKE_CASE","snake":"snake_case","#,
+            r#""kebab":"snake-case","camel":"snakeCase","pascal":"SnakeCase"},"#,
+            r#"{"origin":"kebab-case","screaming_snake":"KEBAB_CASE","snake":"kebab_case","#,
+            r#""kebab":"kebab-case","camel":"kebabCase","pascal":"KebabCase"}]}"#
         );
 
         assert_eq!(actual.as_str(), expect);
@@ -425,10 +425,10 @@ snake_case SNAKE_CASE|snake_case|snake-case|snakeCase|SnakeCase";
         let actual = Convertor::new(Some(options), cases).into_regex_json();
 
         let expect = concat!(
-        r#"{"result":[{"origin":"SCREAMING_SNAKE","#,
-        r#""regex":"SCREAMING_SNAKE|screaming_snake|screaming-snake|screamingSnake|ScreamingSnake"},"#,
-        r#"{"origin":"snake_case","#,
-        r#""regex":"SNAKE_CASE|snake_case|snake-case|snakeCase|SnakeCase"}]}"#
+            r#"{"result":[{"origin":"SCREAMING_SNAKE","#,
+            r#""regex":"SCREAMING_SNAKE|screaming_snake|screaming-snake|screamingSnake|ScreamingSnake"},"#,
+            r#"{"origin":"snake_case","#,
+            r#""regex":"SNAKE_CASE|snake_case|snake-case|snakeCase|SnakeCase"}]}"#
         );
 
         assert_eq!(actual.as_str(), expect);

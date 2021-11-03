@@ -10,7 +10,11 @@ mod app;
 fn main() {
     match operate(app::app().get_matches()) {
         Ok(output) => {
-            print!("{}", output);
+            if is_atty_stdout() {
+                println!("{}", output);
+            } else {
+                print!("{}", output);
+            }
             process::exit(0);
         }
         Err(err) => {
@@ -64,4 +68,8 @@ fn operate(matches: ArgMatches) -> Result<String, Box<dyn Error>> {
 
 fn is_atty_stdin() -> bool {
     atty::is(atty::Stream::Stdin)
+}
+
+fn is_atty_stdout() -> bool {
+    atty::is(atty::Stream::Stdout)
 }
