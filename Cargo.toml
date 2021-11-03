@@ -27,7 +27,7 @@ members = [
 ]
 
 [dependencies]
-clt_lib = { path = "crates/clt_lib" }
+clt_lib = { path = "crates/clt_lib", version = "0.1.0" }
 atty = "~0.2.14"
 
 [dependencies.clap]
