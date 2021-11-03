@@ -6,10 +6,10 @@ fn read_from_single_file() {
     cmd.arg("tests/data/all.txt").assert().success().stdout(
         "\
 SCREAMING_SNAKE SCREAMING_SNAKE screaming_snake screaming-snake screamingSnake ScreamingSnake
-snake_case SNAKE_CASE snake_case snake-case snakeCase SnakeCase
 kebab-case KEBAB_CASE kebab_case kebab-case kebabCase KebabCase
-camelCase CAMEL_CASE camel_case camel-case camelCase CamelCase
-PascalCase PASCAL_CASE pascal_case pascal-case pascalCase PascalCase",
+PascalCase PASCAL_CASE pascal_case pascal-case pascalCase PascalCase
+snake_case SNAKE_CASE snake_case snake-case snakeCase SnakeCase
+camelCase CAMEL_CASE camel_case camel-case camelCase CamelCase",
     );
 }
 
@@ -24,10 +24,10 @@ fn read_from_multiple_files() {
             "\
 userId USER_ID user_id user-id userId UserId
 SCREAMING_SNAKE SCREAMING_SNAKE screaming_snake screaming-snake screamingSnake ScreamingSnake
-snake_case SNAKE_CASE snake_case snake-case snakeCase SnakeCase
 kebab-case KEBAB_CASE kebab_case kebab-case kebabCase KebabCase
-camelCase CAMEL_CASE camel_case camel-case camelCase CamelCase
-PascalCase PASCAL_CASE pascal_case pascal-case pascalCase PascalCase",
+PascalCase PASCAL_CASE pascal_case pascal-case pascalCase PascalCase
+snake_case SNAKE_CASE snake_case snake-case snakeCase SnakeCase
+camelCase CAMEL_CASE camel_case camel-case camelCase CamelCase",
         );
 }
 
