@@ -60,8 +60,7 @@ impl Captor {
     /// Options should be manually escaped by user.
     /// If there is a locator pair which couldn't be converted to regex, return an Err.
     pub fn new(locators: Option<Vec<String>>) -> Result<Captor, String> {
-        let locators = locators.unwrap_or_else(|| vec![r"\s \s".to_string()]);
-
+        let locators = locators.unwrap_or_else(|| vec![r"\b \b".to_string()]);
         let mut patterns = Vec::new();
 
         for locator in locators {
@@ -154,7 +153,7 @@ mod captor_tests {
 
     #[test]
     fn return_empty_vec_when_no_match() {
-        let text = to_string_vec(vec!["@can@not@be@matched"]);
+        let text = to_string_vec(vec!["不能被匹配"]);
         let actual = Captor::new(None).unwrap().capture_words(text);
         assert_eq!(actual, Vec::<String>::new())
     }
@@ -198,6 +197,22 @@ mod captor_tests {
         // notice that the result order is based on option order.
         let expect: Vec<String> =
             to_string_vec(vec!["a", "b", "c", "1", "2", "3"]);
+        assert_eq!(actual, expect);
+    }
+
+    #[test]
+    fn can_capture_all_formats() {
+        let text = to_string_vec(vec![
+            "SCREAMING_SNAKE kebab-case PascalCase snake_case camelCase",
+        ]);
+        let actual = Captor::new(None).unwrap().capture_words(text);
+        let expect: Vec<String> = to_string_vec(vec![
+            "SCREAMING_SNAKE",
+            "kebab-case",
+            "PascalCase",
+            "snake_case",
+            "camelCase",
+        ]);
         assert_eq!(actual, expect);
     }
 }

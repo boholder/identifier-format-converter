@@ -2,10 +2,24 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Cargo test",
+            "cargo": {
+                "args": [
+                    "test",
+                    "-p",
+                    "clt_lib"
+                ]
+            },
+            "program": "${workspaceRoot}/target/debug/naming.exe",
+            "args": []
+        },
+        {
             "name": "(Windows) Launch",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/target/debug/deps/extractor-7ca5103d57c029af.exe",
+            "program": "${workspaceRoot}/target/debug/deps/clt_lib-51e8f66b5c441b23.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

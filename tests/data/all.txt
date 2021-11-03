@@ -1,5 +1,5 @@
 SCREAMING_SNAKE
-kebab-case
-PascalCase
 snake_case
+kebab-case
 camelCase
+PascalCase
