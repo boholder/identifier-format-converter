@@ -73,7 +73,7 @@ $ cargo test --all
 ```
 
 There are
-[two ignored tests](crates/clt_lib/tests/identifying_ability_on_languages.rs)
+[two ignored tests](crates/naming_clt_lib/tests/identifying_ability_on_languages.rs)
 , don't mind, these two tests made us to narrow down the capabilities of the tool, avoid duplicate
 implementing grep's functionality.
 

@@ -1,6 +1,6 @@
 // These tests test the ability to get the original text from files.
 
-use clt_lib as lib;
+use naming_clt_lib as lib;
 
 #[test]
 fn read_from_single_file_without_logical_eof() {

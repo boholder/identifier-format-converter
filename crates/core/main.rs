@@ -3,7 +3,7 @@ use std::process;
 
 use clap::ArgMatches;
 
-use clt_lib::*;
+use naming_clt_lib::*;
 
 mod app;
 

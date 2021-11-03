@@ -6,10 +6,10 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/naming_lib/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/naming_lib/tests" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/crates/clt_lib/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/crates/clt_lib/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/crates/core/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/naming_clt_lib/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/naming_clt_lib/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

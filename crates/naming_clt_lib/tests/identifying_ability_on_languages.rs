@@ -6,7 +6,7 @@
 // We learned about the limitations of this tool,
 // and marked this in the document for users.
 
-use clt_lib::{self as lib, Captor, Filter};
+use naming_clt_lib::{self as lib, Captor, Filter};
 use naming_lib::{which_case, NamingCase};
 
 #[ignore]

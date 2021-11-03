@@ -1,0 +1,15 @@
+[package]
+name = "naming_clt_lib"
+version = "0.1.0"
+authors = ["Boholder <bottleholder@anche.no>"]
+description = """
+Functions which serve the command line tool [naming].
+"""
+repository = "https://github.com/boholder/naming"
+edition = "2018"
+license = "MIT"
+
+[dependencies]
+regex = "~1.5.4"
+lazy_static = "~1.4.0"
+naming_lib = "~0.1.4"

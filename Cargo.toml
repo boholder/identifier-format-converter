@@ -23,11 +23,11 @@ bench = false
 [workspace]
 members = [
     "crates/naming_lib",
-    "crates/clt_lib"
+    "crates/naming_clt_lib"
 ]
 
 [dependencies]
-clt_lib = { path = "crates/clt_lib", version = "0.1.0" }
+naming_clt_lib = { version = "0.1.0", path = "crates/naming_clt_lib" }
 atty = "~0.2.14"
 
 [dependencies.clap]
