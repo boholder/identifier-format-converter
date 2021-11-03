@@ -10,7 +10,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
 
@@ -18,11 +18,27 @@ jobs:
     - uses: actions/checkout@v2
     - name: init submodules
       run: git submodule update --init --recursive
-    - name: build
-      run: cargo build --verbose
     - name: run tests
       run: cargo test --all --verbose
-    - name: rustfmt
+      
+  rustfmt:
+  
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: init submodules
+      run: git submodule update --init --recursive
+    - name: run format check
       run: cargo fmt -- --check
-    - name: clippy
+      
+  clippy:
+  
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: init submodules
+      run: git submodule update --init --recursive
+    - name: run clippy
       run: cargo clippy -- -D warnings
