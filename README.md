@@ -77,7 +77,7 @@ There are
 , don't mind, these two tests made us to narrow down the capabilities of the tool, avoid duplicate
 implementing grep's functionality.
 
-# Contribution
+### Contribution
 
 * Does the [user guide](doc/USERGUIDE.md) and [help information](crates/core/app.rs) sound natural?
   Help us fix grammatical errors and polish the description.
