@@ -6,4 +6,4 @@ edition = "2018"
 [dependencies]
 regex = "~1.5.4"
 lazy_static = "~1.4.0"
-naming_lib = { path = "../naming_lib" }
+naming_lib = "~0.1.4"
