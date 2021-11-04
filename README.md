@@ -17,7 +17,7 @@ operations (matching,replacing...) on relative files.
 
 ### What it can do?
 
-You can convert one identifier to different naming cases, with multiple output formats.
+You can convert identifiers to different naming cases, with multiple output formats.
 
 ```text
 $ echo "userId" | naming
@@ -29,6 +29,23 @@ $ echo "userId" | naming --json
 
 $ echo "userId" | naming --regex
 userId USER_ID|user_id|user-id|userId|UserId
+```
+
+You can extract identifiers from files or stdin(via pipe, have shown above).
+
+```text
+$ cat a.txt
+SCREAMING_SNAKE
+snake_case
+kebab-case
+camelCase
+PascalCase
+$ naming a.txt
+SCREAMING_SNAKE SCREAMING_SNAKE screaming_snake screaming-snake screamingSnake ScreamingSnake
+snake_case SNAKE_CASE snake_case snake-case snakeCase SnakeCase
+kebab-case KEBAB_CASE kebab_case kebab-case kebabCase KebabCase
+camelCase CAMEL_CASE camel_case camel-case camelCase CamelCase
+PascalCase PASCAL_CASE pascal_case pascal-case pascalCase PascalCase
 ```
 
 The following example is more complex than entering commands manually, but it automates the process,
@@ -83,3 +100,5 @@ implementing grep's functionality.
   Help us fix grammatical errors and polish the description.
 * When you found a bug or have suggestions, feel free to submit
   new [issues](https://github.com/boholder/naming/issues/new).
+* What command line tools is this tool suitable for use in combination with? Have you found any 
+  useful ways to use this tool? Feel free to submit an issue or PR to share your findings.
