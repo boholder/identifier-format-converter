@@ -67,8 +67,15 @@ bash -c 'sed -i "s/$0/$1/g" src_file' pageSize page_size
 
 We provide pre-compiled binaries for `x86_64-pc-windows-gnu`, `x86_64-unknown-linux-musl`
 and `x86_64-apple-darwin` platforms, you can download them at
-[release page](https://github.com/boholder/naming/releases). Or you can build it directly from
-source code, following the [building](#building) progress.
+[release page](https://github.com/boholder/naming/releases). 
+
+Or you can build it directly from source code, following the [building](#building) progress
+or just type (assuming you alreay  have installed 
+[Rust dev toolchain](https://www.rust-lang.org/tools/install)):
+
+```text
+$ cargo install naming_clt
+```
 
 ### Building
 
