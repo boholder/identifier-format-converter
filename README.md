@@ -69,13 +69,17 @@ We provide pre-compiled binaries for `x86_64-pc-windows-gnu`, `x86_64-unknown-li
 and `x86_64-apple-darwin` platforms, you can download them at
 [release page](https://github.com/boholder/naming/releases). 
 
-Or you can build it directly from source code, following the [building](#building) progress
-or just type (assuming you alreay  have installed 
-[Rust dev toolchain](https://www.rust-lang.org/tools/install)):
+You can also build it (assuming you alreay have installed 
+[Rust dev toolchain](https://www.rust-lang.org/tools/install)) directly from source code
+("nightly" version?), following the [building](#building) progress.
+
+Or just type:
 
 ```text
 $ cargo install naming_clt
 ```
+
+to install a stable version.
 
 ### Building
 
