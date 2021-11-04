@@ -1,6 +1,7 @@
 ## naming
 
 [![CI](https://github.com/boholder/naming/actions/workflows/ci.yml/badge.svg)](https://github.com/boholder/naming/actions/workflows/ci.yml)
+[![Crates Version](https://img.shields.io/crates/v/naming_clt.svg)](https://crates.io/crates/naming_clt)
 
 naming is a command line tool that helps you extract and convert the naming format (case|notation)
 of identifiers from files or stdin. Use this tool to prepare identifier name strings for further
