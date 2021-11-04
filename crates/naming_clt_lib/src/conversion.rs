@@ -264,9 +264,9 @@ mod filter_tests {
 
     #[test]
     fn find_hungarian_camel_conflict() {
-        assert!(Filter::has_hungarian_camel_conflict(&vec![
+        assert!(Filter::has_hungarian_camel_conflict(&[
             "c".to_string(),
-            "h".to_string(),
+            "h".to_string()
         ]));
     }
 

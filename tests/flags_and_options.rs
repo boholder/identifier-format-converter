@@ -42,7 +42,7 @@ SCREAMING_SNAKE SCREAMING_SNAKE screaming_snake screaming-snake screamingSnake S
 #[test]
 fn locator() {
     let mut cmd = Command::cargo_bin("naming").unwrap();
-    cmd.arg(format!(r"--locator=\scam Case\s,ke -case"))
+    cmd.arg(r"--locator=\scam Case\s,ke -case")
         .arg("tests/data/all.txt")
         .assert()
         .success()
@@ -58,7 +58,7 @@ fn locator_invalid_when_single_valid_word_appears_in_special_position() {
     // 1. it's a valid word
     // 2. it's head position is "start of file" (\A),
     //    and tail position is "end of file" (\z)
-    cmd.arg(format!(r#"--locator="\s Id""#))
+    cmd.arg(r#"--locator="\s Id""#)
         .arg("tests/data/one.txt")
         .assert()
         .success()

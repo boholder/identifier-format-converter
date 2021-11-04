@@ -6,8 +6,9 @@
 // We learned about the limitations of this tool,
 // and marked this in the document for users.
 
-use naming_clt_lib::{self as lib, Captor, Filter};
 use naming_lib::{which_case, NamingCase};
+
+use naming_clt_lib::{self as lib, Captor, Filter};
 
 #[ignore]
 #[test]
@@ -28,7 +29,7 @@ fn java() {
     // to identifying difference between lines like this
     // with common assignment statements like
     // line 51: "private String name;"
-    let expect = to_naming_case_vec(Box::from([
+    let expect = to_naming_case_vec(&[
         "count",
         "targetIsLive",
         "liveNeighborCount",
@@ -37,12 +38,12 @@ fn java() {
         "data",
         "name",
         "category",
-    ]));
+    ]);
 
     assert_eq!(actual, expect);
 }
 
-fn to_naming_case_vec(array: Box<[&str]>) -> Vec<NamingCase> {
+fn to_naming_case_vec(array: &[&str]) -> Vec<NamingCase> {
     array.iter().map(|id| which_case(*id)).collect()
 }
 
@@ -66,14 +67,14 @@ fn javascript() {
     // line 16: "return a - b;" -> "b"
     // should I add logic that discard words that matched in method params?
     // no, that's unnecessary complex.
-    let expect = to_naming_case_vec(Box::from([
+    let expect = to_naming_case_vec(&[
         "findMinDifference",
         "sorted",
         "headTail",
         "min",
         "i",
         "b",
-    ]));
+    ]);
 
     assert_eq!(actual, expect);
 }
