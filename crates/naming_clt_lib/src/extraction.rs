@@ -62,46 +62,53 @@ impl Captor {
     pub fn new(locators: Option<Vec<String>>) -> Result<Captor, String> {
         let locators = locators.unwrap_or_else(|| vec![r"\b \b".to_string()]);
         let mut patterns = Vec::new();
-
         for locator in locators {
-            let pair = locator.split_once(" ");
-            if pair.is_none() {
-                return Err(format!(
-                    "naming: locator `{}`: can't build locator pair from this.",
-                    locator
-                ));
-            }
-            let pair = pair.unwrap();
-
-            patterns.push(
-                Regex::new(
-                    // \A for start of file position,
-                    // \z for end of file position
-                    &format!(
-                        r"(?:{}|\A)([a-zA-Z0-9_-]+)(?:{}|\z)",
-                        pair.0, pair.1
-                    ),
-                )
-                .unwrap(),
-            );
+            patterns.push(Captor::build_pattern_from(locator)?);
         }
-
         Ok(Captor { patterns })
+    }
+
+    fn build_pattern_from(locator: String) -> Result<Regex, String> {
+        let pair = locator.split_once(" ");
+        if pair.is_none() {
+            return Err(format!(
+                "naming: locator `{}`: can't build locator pair from this.",
+                locator
+            ));
+        }
+        let pair = pair.unwrap();
+
+        Ok(Regex::new(
+            // \A for start of file position,
+            // \z for end of file position
+            &format!(r"(?:{}|\A)([a-zA-Z0-9_-]+)(?:{}|\z)", pair.0, pair.1),
+        )
+        .unwrap())
     }
 
     /// Extract words from given long text string,
     /// with regular expression and given locating prefix & suffix.
     pub fn capture_words(&self, text: Vec<String>) -> Vec<String> {
         // apply matching on each file's content
-        let mut matches: Vec<String> = text
-            .iter()
-            .map(|text| {
+        let mut matches = self.get_matches_from(text);
+
+        // dedup while keep the order, what an elegant solution:
+        // https://users.rust-lang.org/t/deduplicate-vector-in-place-while-preserving-order/56568/6
+        let mut set = HashSet::new();
+        matches.retain(|word| set.insert(word.clone()));
+
+        matches
+    }
+
+    fn get_matches_from(&self, text: Vec<String>) -> Vec<String> {
+        text.iter()
+            .map(|t| {
                 // for each file's content, apply all patterns on it.
                 self.patterns
                     .iter()
                     .map(move |pattern| {
                         pattern
-                            .captures_iter(text)
+                            .captures_iter(t)
                             .into_iter()
                             .map(|cap| cap[1].to_string())
                     })
@@ -109,13 +116,7 @@ impl Captor {
                 // now get one file's matches
             })
             .flatten()
-            .collect();
-
-        // dedup while keep the order, what an elegant solution:
-        // https://users.rust-lang.org/t/deduplicate-vector-in-place-while-preserving-order/56568/6
-        let mut set = HashSet::new();
-        matches.retain(|word| set.insert(word.clone()));
-        matches
+            .collect()
     }
 }
 

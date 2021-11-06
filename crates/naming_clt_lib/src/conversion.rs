@@ -30,29 +30,8 @@ impl Filter {
     /// but also apply given filter on result vector.
     pub fn to_naming_cases_from(&self, words: Vec<String>) -> Vec<NamingCase> {
         let words = self.filter_words_with_options(words);
-
-        // if user wants to treat camel case words as hungarian notation format.
-        let required_hungarian = self.options.contains(&"h".to_string());
-        words
-            .iter()
-            .map(|word| {
-                if required_hungarian && naming::is_camel(word) {
-                    naming::from_hungarian_notation(word)
-                } else {
-                    naming::which_case(word)
-                }
-            })
-            .collect()
+        self.convert_words_to_naming_cases(words)
     }
-
-    const PREDICATES: [Predicate; 6] = [
-        Predicate { name: "S", function: naming::is_screaming_snake },
-        Predicate { name: "s", function: naming::is_snake },
-        Predicate { name: "k", function: naming::is_kebab },
-        Predicate { name: "c", function: naming::is_camel },
-        Predicate { name: "h", function: naming::is_camel },
-        Predicate { name: "p", function: naming::is_pascal },
-    ];
 
     fn filter_words_with_options(&self, mut words: Vec<String>) -> Vec<String> {
         let predicates: Vec<fn(&str) -> bool> = Filter::PREDICATES
@@ -67,8 +46,35 @@ impl Filter {
         words
     }
 
+    const PREDICATES: [Predicate; 6] = [
+        Predicate { name: "S", function: naming::is_screaming_snake },
+        Predicate { name: "s", function: naming::is_snake },
+        Predicate { name: "k", function: naming::is_kebab },
+        Predicate { name: "c", function: naming::is_camel },
+        Predicate { name: "h", function: naming::is_camel },
+        Predicate { name: "p", function: naming::is_pascal },
+    ];
+
     fn is_one_of_formats(predicates: &[fn(&str) -> bool], word: &str) -> bool {
         predicates.iter().map(|f| f(word)).reduce(|a, b| a || b).unwrap()
+    }
+
+    fn convert_words_to_naming_cases(
+        &self,
+        words: Vec<String>,
+    ) -> Vec<NamingCase> {
+        // if user wants to treat camel case words as hungarian notation format.
+        let required_hungarian = self.options.contains(&"h".to_string());
+        words
+            .iter()
+            .map(|word| {
+                if required_hungarian && naming::is_camel(word) {
+                    naming::from_hungarian_notation(word)
+                } else {
+                    naming::which_case(word)
+                }
+            })
+            .collect()
     }
 }
 
@@ -96,18 +102,6 @@ impl Convertor {
         Convertor { options, cases }
     }
 
-    fn select_mappers_base_on_options(
-        &self,
-        mappers: &HashMap<&'static str, Formatter>,
-    ) -> Box<[Formatter]> {
-        // let the order of mappers to be same as
-        // the order of options in vector.
-        self.options
-            .iter()
-            .map(|option| *mappers.get(option.as_str()).unwrap())
-            .collect()
-    }
-
     /// Normal output format, each line represent a captures in input text.
     ///
     /// Output looks like:
@@ -120,24 +114,38 @@ impl Convertor {
 
         self.cases
             .into_iter()
-            .map(|case| {
-                // keep the origin string as the first word.
-                let mut line = case.to_string();
-                line.push(' ');
-
-                // append target words behind.
-                line.push_str(
-                    &mappers
-                        .iter()
-                        .map(|f| (f.inner)(&case))
-                        .collect::<Vec<String>>()
-                        .join(" "),
-                );
-                line
-                // each word in input -> one line of result in output
-            })
+            .map(|case| Convertor::one_word_to_line(&mappers, &case))
             .collect::<Vec<String>>()
             .join("\n")
+    }
+
+    fn select_mappers_base_on_options(
+        &self,
+        mappers: &HashMap<&'static str, Formatter>,
+    ) -> Box<[Formatter]> {
+        // let the order of mappers to be same as
+        // the order of options in vector.
+        self.options
+            .iter()
+            .map(|option| *mappers.get(option.as_str()).unwrap())
+            .collect()
+    }
+
+    /// each word in input -> one line of result in output.
+    fn one_word_to_line(mappers: &[Formatter], case: &NamingCase) -> String {
+        // keep the origin string as the first word.
+        let mut line = case.to_string();
+        line.push(' ');
+
+        // append target words behind.
+        line.push_str(
+            &mappers
+                .iter()
+                .map(|f| (f.inner)(case))
+                .collect::<Vec<String>>()
+                .join(" "),
+        );
+        line
     }
 
     /// Output in this format when user enters `--json` option,
@@ -154,22 +162,7 @@ impl Convertor {
         let json_array_fields = self
             .cases
             .into_iter()
-            .map(|case| {
-                let mut line =
-                    r#"{"origin":""#.to_string() + &case.to_string() + "\",";
-
-                line.push_str(
-                    &mappers
-                        .iter()
-                        .map(|f| (f.inner)(&case))
-                        .collect::<Vec<String>>()
-                        .join(","),
-                );
-
-                line.push('}');
-                // "{"origin":"a_a","camel":"aA",...}"
-                line
-            })
+            .map(|case| Convertor::one_word_to_json(&mappers, &case))
             .collect::<Vec<String>>()
             .join(",");
 
@@ -177,6 +170,22 @@ impl Convertor {
         result.push_str("]}");
         // "{"result":[{...},{...},...]}"
         result
+    }
+
+    fn one_word_to_json(mappers: &[Formatter], case: &NamingCase) -> String {
+        let mut line = r#"{"origin":""#.to_string() + &case.to_string() + "\",";
+
+        line.push_str(
+            &mappers
+                .iter()
+                .map(|f| (f.inner)(case))
+                .collect::<Vec<String>>()
+                .join(","),
+        );
+
+        line.push('}');
+        // "{"origin":"a_a","camel":"aA",...}"
+        line
     }
 
     /// Output in this format when user enters `--regex` option,
@@ -192,23 +201,25 @@ impl Convertor {
 
         self.cases
             .into_iter()
-            .map(|case| {
-                // keep the origin string as the first word.
-                let mut line = case.to_string();
-                line.push(' ');
-
-                // join target formats into one regex string with "|"
-                line.push_str(
-                    &mappers
-                        .iter()
-                        .map(|f| (f.inner)(&case))
-                        .collect::<Vec<String>>()
-                        .join("|"),
-                );
-                line
-            })
+            .map(|case| Convertor::one_word_to_regex(&mappers, &case))
             .collect::<Vec<String>>()
             .join("\n")
+    }
+
+    fn one_word_to_regex(mappers: &[Formatter], case: &NamingCase) -> String {
+        // keep the origin string as the first word.
+        let mut line = case.to_string();
+        line.push(' ');
+
+        // join target formats into one regex string with "|"
+        line.push_str(
+            &mappers
+                .iter()
+                .map(|f| (f.inner)(case))
+                .collect::<Vec<String>>()
+                .join("|"),
+        );
+        line
     }
 
     /// Output in this format when user enters both `--regex` and `-json` options,
@@ -226,24 +237,7 @@ impl Convertor {
         let json_array_fields = self
             .cases
             .into_iter()
-            .map(|case| {
-                let mut line = r#"{"origin":""#.to_string()
-                    + &case.to_string()
-                    + r#"","regex":""#;
-
-                // concat target formats into an OR regex
-                line.push_str(
-                    &mappers
-                        .iter()
-                        .map(|f| (f.inner)(&case))
-                        .collect::<Vec<String>>()
-                        .join("|"),
-                );
-
-                line.push_str("\"}");
-                // "{"origin":"a_a","regex":"aA|a_a|AA"}"
-                line
-            })
+            .map(|case| Convertor::one_word_to_regex_json(&mappers, &case))
             .collect::<Vec<String>>()
             .join(",");
 
@@ -251,6 +245,27 @@ impl Convertor {
         result.push_str("]}");
         // "{"result":[{...},{...},...]}"
         result
+    }
+
+    fn one_word_to_regex_json(
+        mappers: &[Formatter],
+        case: &NamingCase,
+    ) -> String {
+        let mut line =
+            r#"{"origin":""#.to_string() + &case.to_string() + r#"","regex":""#;
+
+        // concat target formats into an OR regex
+        line.push_str(
+            &mappers
+                .iter()
+                .map(|f| (f.inner)(case))
+                .collect::<Vec<String>>()
+                .join("|"),
+        );
+
+        line.push_str("\"}");
+        // "{"origin":"a_a","regex":"aA|a_a|AA"}"
+        line
     }
 }
 
