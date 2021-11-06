@@ -24,8 +24,20 @@ fn main() {
     };
 }
 
+fn is_atty_stdout() -> bool {
+    atty::is(atty::Stream::Stdout)
+}
+
 /// A wrapper that does everything from user input to output.
 fn operate(matches: ArgMatches) -> Result<String, Box<dyn Error>> {
+    let text = get_text_from_input(&matches)?;
+    let convertor = wrap_text_with_converter(&matches, text)?;
+    output_as_string(matches, convertor)
+}
+
+fn get_text_from_input(
+    matches: &ArgMatches,
+) -> Result<Vec<String>, Box<dyn Error>> {
     let eof = matches.value_of("eof");
     let text = match matches.values_of_lossy("files") {
         None => {
@@ -39,7 +51,17 @@ fn operate(matches: ArgMatches) -> Result<String, Box<dyn Error>> {
         }
         Some(files) => read_from_files(&files, eof)?,
     };
+    Ok(text)
+}
 
+fn is_atty_stdin() -> bool {
+    atty::is(atty::Stream::Stdin)
+}
+
+fn wrap_text_with_converter(
+    matches: &ArgMatches,
+    text: Vec<String>,
+) -> Result<Convertor, Box<dyn Error>> {
     let option = |tag: &str| matches.values_of_lossy(tag);
 
     // text (String) --Captor--> words (Vec<String>)
@@ -51,7 +73,13 @@ fn operate(matches: ArgMatches) -> Result<String, Box<dyn Error>> {
             Captor::new(option("locator"))?.capture_words(text),
         ),
     );
+    Ok(convertor)
+}
 
+fn output_as_string(
+    matches: ArgMatches,
+    convertor: Convertor,
+) -> Result<String, Box<dyn Error>> {
     let json_flag_is_passed = matches.is_present("json");
     let regex_flag_is_passed = matches.is_present("regex");
 
@@ -64,12 +92,4 @@ fn operate(matches: ArgMatches) -> Result<String, Box<dyn Error>> {
     } else {
         Ok(convertor.into_lines())
     }
-}
-
-fn is_atty_stdin() -> bool {
-    atty::is(atty::Stream::Stdin)
-}
-
-fn is_atty_stdout() -> bool {
-    atty::is(atty::Stream::Stdout)
 }
