@@ -2,29 +2,29 @@ use std::collections::HashSet;
 use std::fs;
 use std::io::{self, BufRead};
 
-use regex::{self, Regex};
+use fancy_regex::Regex;
 
 /// Convert Vec<String> into a slice of &str in Rust:
 /// https://stackoverflow.com/a/41180422/11397457
 pub fn read_from_files<T: AsRef<str>>(
     files: &[T],
-    eof: Option<&str>,
+    logical_eof: Option<&str>,
 ) -> Result<Vec<String>, String> {
     let mut text = Vec::new();
     for file in files {
-        text.push(read_file(file.as_ref(), eof)?);
+        text.push(read_file(file.as_ref(), logical_eof)?);
     }
     Ok(text)
 }
 
 fn read_file(file: &str, eof: Option<&str>) -> Result<String, String> {
     match fs::read_to_string(file) {
-        Ok(text) => Ok(apply_eof_on_text(eof, text)),
+        Ok(text) => Ok(trim_text_with_logical_eof(eof, text)),
         Err(msg) => Err(format!("naming: {}: {}", file, msg)),
     }
 }
 
-fn apply_eof_on_text(eof: Option<&str>, text: String) -> String {
+fn trim_text_with_logical_eof(eof: Option<&str>, text: String) -> String {
     match eof {
         None => text,
         Some(eof) => {
@@ -45,7 +45,7 @@ where
 {
     let mut buffer = String::new();
     match input.read_to_string(&mut buffer) {
-        Ok(_) => Ok(apply_eof_on_text(eof, buffer)),
+        Ok(_) => Ok(trim_text_with_logical_eof(eof, buffer)),
         Err(msg) => Err(format!("naming: stdin: {}", msg)),
     }
 }
@@ -60,7 +60,10 @@ impl Captor {
     /// Options should be manually escaped by user.
     /// If there is a locator pair which couldn't be converted to regex, return an Err.
     pub fn new(locators: Option<Vec<String>>) -> Result<Captor, String> {
-        let locators = locators.unwrap_or_else(|| vec![r"\b \b".to_string()]);
+        // TODO 手册里写双括号来代表单词
+        // Set default locator as word edge '\b'.
+        let locators =
+            locators.unwrap_or_else(|| vec![r"(?<=\b){}(?=\b)".to_string()]);
         let mut patterns = Vec::new();
         for locator in locators {
             patterns.push(Captor::build_pattern_from(locator)?);
@@ -69,21 +72,19 @@ impl Captor {
     }
 
     fn build_pattern_from(locator: String) -> Result<Regex, String> {
-        let pair = locator.split_once(" ");
+        let pair = locator.split_once("{}");
         if pair.is_none() {
             return Err(format!(
-                "naming: locator `{}`: can't build locator pair from this.",
+                "naming: locator `{}`: can't split locator pair from this.",
                 locator
             ));
         }
         let pair = pair.unwrap();
 
-        Ok(Regex::new(
-            // \A for start of file position,
-            // \z for end of file position
-            &format!(r"(?:{}|\A)([a-zA-Z0-9_-]+)(?:{}|\z)", pair.0, pair.1),
-        )
-        .unwrap())
+        // Currently, we use `([a-zA-Z0-9_-]+)` to match words, it's ok for now,
+        // because it could match words with any naming format.
+        Ok(Regex::new(&format!(r"{}([a-zA-Z0-9_-]+){}", pair.0, pair.1))
+            .unwrap())
     }
 
     /// Extract words from given long text string,
@@ -96,7 +97,6 @@ impl Captor {
         // https://users.rust-lang.org/t/deduplicate-vector-in-place-while-preserving-order/56568/6
         let mut set = HashSet::new();
         matches.retain(|word| set.insert(word.clone()));
-
         matches
     }
 
@@ -107,10 +107,9 @@ impl Captor {
                 self.patterns
                     .iter()
                     .map(move |pattern| {
-                        pattern
-                            .captures_iter(t)
-                            .into_iter()
-                            .map(|cap| cap[1].to_string())
+                        pattern.captures_iter(t).into_iter().map(|cap| {
+                            cap.unwrap().get(1).unwrap().as_str().to_string()
+                        })
                     })
                     .flatten()
                 // now get one file's matches
@@ -164,7 +163,7 @@ mod captor_tests {
         let text =
             to_string_vec(vec!["int i = 1; String s = oneMethod(arg1, arg2);"]);
         let actual =
-            Captor::new(Some(to_string_vec(vec![r"\s \s*=", r"\s \s*;"])))
+            Captor::new(Some(to_string_vec(vec![r"\s{}\s*=", r"\s{}\s*;"])))
                 .unwrap()
                 .capture_words(text);
         let expect: Vec<String> = to_string_vec(vec!["i", "s", "1"]);
@@ -176,7 +175,7 @@ mod captor_tests {
         let text = to_string_vec(vec!["@now#can$be&matched"]);
         // note that "$" is manually escaped.
         let locators: Vec<String> =
-            to_string_vec(vec![r"# \$", "@ #", r"\$ &", r"& \z"]);
+            to_string_vec(vec![r"#{}\$", "@{}#", r"\${}&", r"&{}\z"]);
 
         let actual = Captor::new(Some(locators)).unwrap().capture_words(text);
         // notice that the result order is based on option order.
@@ -192,7 +191,7 @@ mod captor_tests {
             "let a = 1; let b = 2; let c = 3;",
         ]);
         let actual =
-            Captor::new(Some(to_string_vec(vec![r"\s \s*=", r"\s \s*;"])))
+            Captor::new(Some(to_string_vec(vec![r"\s{}\s*=", r"\s{}\s*;"])))
                 .unwrap()
                 .capture_words(text);
         // notice that the result order is based on option order.

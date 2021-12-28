@@ -67,7 +67,7 @@ fn args<'a, 'b>() -> Box<[Arg<'a, 'b>]> {
             .help(
                 "Set locator pairs around identifiers, \
                 the separator between prefix and suffix is a space; \
-                default(1): \"\\s \\s\"",
+                default(1): \"(?<=\\b)<word>(?=\\b)\"",
             )
             .takes_value(true)
             .multiple(true)
@@ -139,54 +139,21 @@ to the line contains given eof-word, to this tool.
 
 const LOCATOR_HELP: &str = "\
 Set locator pairs around identifiers, in each pair value,
-the delimiter between prefix and suffix is a space.
-
-[!] Although this tool provides this option for convenience,
-be careful when using it. See warning information below for detail.
+the delimiter between prefix and suffix is a pair of brackets \"{}\".
 
 The two parts of a pair are inserted directly into the
 regular pattern, so users need to manually escape the characters
 that need to be escaped. For [the regex syntax], check this document:
 
-    https://docs.rs/regex/1.5.4/regex/index.html#syntax
+    https://docs.rs/fancy-regex/0.7.1/fancy_regex/index.html#syntax
 
-Default(1): \"\\b \\b\", which will match the valid identifiers
-separated by \"Unicode word boundary (\\w on one side and \\W,
-\\A, or \\z on other)\" positions.
+Default(1): \"(?<=\\b){}(?=\\b)\", which will match the valid identifiers
+separated by \"Unicode word boundary (\\w on one side and \\W, \\A, or \\z
+on the other side)\" positions.
 
-Each value passed to this option will be transformed to an regex
-pattern looks like: \"(?:<prefix>|\\A)(identifier)(?:<suffix>|\\z)\",
-where \\A for matching the start of file position and
-\\z for matching the end of file position.
-
-So there is no need to worry about having a match right next to
-the start or end of the file. If the input is only one valid word,
-that word will also be matched because of the hardcoded logic
-described above.
-
-[!]WARNING:
-Sorry for letting you know these implementation details.
-The rust regex library \"regex\" will matches text with a
-\"non-overlapping\" way, while it doesn't support lookaround syntax.
-So for the implementation, I used non-capture tuples to
-match prefixes and suffixes, which have mentioned above.
-
-An unintentional locator value, for example \"\\s \\s\",
-will generates a pattern \"(?:\\s|\\A)([a-zA-Z0-9_-]+)(?:\\s|\\z)\".
-This pattern will only matches \"a\" and \"c\" on text \"a b c\",
-while \"b\" shares two space symbols with \"a\" and \"c\".
-First matches \"<start of file>a \", remain \"b c<eof>\",
-then matches \" c<eof>\", further extracting via group number
-gets \"a\" and \"c\" as final result.
-
-As you can see, locators that represent characters rather than
-positions may let to this unwanted result. Please use this option
-carefully and make sure the output of this tool is as expected,
-or use the grep method mentioned below as an alternative to
-extracting words from input text.
-
-[!]NOTE: Any incomplete pair value that couldn't be split
-into two part by space delimiter like \"a\",\" a\",\"a \"
+NOTE:
+Any incomplete pair value that couldn't be split
+into two part by space delimiter like \"a\",\"{}a\",\"a{}\"
 will let the tool outputs nothing and exits with non-zero signal.
 
 NOTE:

@@ -42,7 +42,7 @@ SCREAMING_SNAKE SCREAMING_SNAKE screaming_snake screaming-snake screamingSnake S
 #[test]
 fn locator() {
     let mut cmd = Command::cargo_bin("naming").unwrap();
-    cmd.arg(r"--locator=\scam Case\s,ke -case")
+    cmd.arg(r"--locator=\scam{}Case\s,ke{}-case")
         .arg("tests/data/all.txt")
         .assert()
         .success()
@@ -50,19 +50,13 @@ fn locator() {
 }
 
 #[test]
-fn locator_invalid_when_single_valid_word_appears_in_special_position() {
+fn locator_support_lookaround() {
     let mut cmd = Command::cargo_bin("naming").unwrap();
-    // Note that in one.txt, word "userId " has a space after it.
-    // If remove that space, the hardcoded pair "\A(word)\z"
-    // will match the "userId" because:
-    // 1. it's a valid word
-    // 2. it's head position is "start of file" (\A),
-    //    and tail position is "end of file" (\z)
-    cmd.arg(r#"--locator="\s Id""#)
+    cmd.arg(r"--locator=(?<=u){}(?=Id)")
         .arg("tests/data/one.txt")
         .assert()
         .success()
-        .stdout("userId USER_ID user_id user-id userId UserId");
+        .stdout("ser SER ser ser ser Ser");
 }
 
 #[test]

@@ -1,6 +1,6 @@
 [package]
 name = "naming_clt_lib"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Boholder <bottleholder@anche.no>"]
 description = """
 Functions which serve the command line tool [naming].
@@ -10,6 +10,6 @@ edition = "2018"
 license = "MIT"
 
 [dependencies]
-regex = "~1.5.4"
+fancy-regex = "~0.7.1"
 lazy_static = "~1.4.0"
 naming_lib = "~0.1.4"
